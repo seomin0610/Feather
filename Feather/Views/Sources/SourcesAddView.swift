@@ -38,6 +38,8 @@ struct SourcesAddView: View {
 	let recommendedSources: [URL] = [
 		"https://raw.githubusercontent.com/seomin0610/Feather/refs/heads/main/app-repo.json",
 		"https://waterwave.space/app.json",
+		"https://source.ryuksign.com",
+		"https://repository.apptesters.org/",
 		"https://raw.githubusercontent.com/Aidoku/Aidoku/altstore/apps.json",
 		"https://github.com/chachillie/Flycast-iOS/raw/main/flycast-ios.json",
 		"https://xitrix.github.io/iTorrent/AltStore.json",

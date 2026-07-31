@@ -22,6 +22,8 @@ jobs:
           TAG="${{ github.event.release.tag_name }}"
           DATE="${{ github.event.release.published_at }}"
           VERSION="${TAG#v}"
+          NEWS_DATE="${DATE%%T*}"
+          UPDATE_URL="https://signer.waterwave.space"
 
           DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/Feather.ipa"
 
@@ -29,13 +31,22 @@ jobs:
             --arg version "$VERSION" \
             --arg date "$DATE" \
             --arg url "$DOWNLOAD_URL" \
+            --arg newsDate "$NEWS_DATE" \
+            --arg updateUrl "$UPDATE_URL" \
             '
             .apps[0].version = $version |
             .apps[0].versionDate = $date |
             .apps[0].downloadURL = $url |
-            .apps[0].versions[0].version = $version |
-            .apps[0].versions[0].date = $date |
-            .apps[0].versions[0].downloadURL = $url
+            .apps[0].versions = [{version: $version, date: $date, downloadURL: $url}] + .apps[0].versions |
+            .news = [{
+              title: ("Feather " + $version + " 업데이트"),
+              identifier: ("feather-update-" + $version),
+              caption: ("Feather has been updated to version " + $version + ". Visit " + "Web signer" + " to update."),
+              tintColor: "8A28F7",
+              url: $updateUrl,
+              date: $newsDate,
+              notify: true
+            }] + .news
             ' app-repo.json > tmp.json
 
           mv tmp.json app-repo.json

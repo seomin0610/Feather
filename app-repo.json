@@ -1,14 +1,14 @@
 {
   "name": "Feather Repository",
   "identifier": "kh.crysalis.feather-repo",
-  "iconURL": "https://github.com/seomin0610/Feather/blob/v1.x/iOS/Resources/Icons/Main/Mac@3x.png?raw=true",
+  "iconURL": "https://github.com/claration/Feather/blob/v1.x/iOS/Resources/Icons/Main/Mac@3x.png?raw=true",
   "website": "https://github.com/seomin0610/Feather",
   "apps": [
     {
       "name": "Feather",
       "bundleIdentifier": "thewonderofyou.Feather",
       "developerName": "Samara",
-      "iconURL": "https://github.com/seomin0610/Feather/blob/v1.x/iOS/Resources/Icons/Main/Mac@3x.png?raw=true",
+      "iconURL": "https://github.com/claration/Feather/blob/v1.x/iOS/Resources/Icons/Main/Mac@3x.png?raw=true",
       "localizedDescription": "Feather is a free on-device iOS application manager/installer built with UIKit for quality.",
       "subtitle": "On-device signing application",
       "tintColor": "848ef9",

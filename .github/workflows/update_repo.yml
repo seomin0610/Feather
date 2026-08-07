@@ -3,11 +3,13 @@ name: Update Repository
 on:
   release:
     types: [published]
-
+    
+permissions:
+  contents: write
+    
 jobs:
   build:
     runs-on: macos-latest
-
     steps:
       - uses: actions/checkout@v3
         with:

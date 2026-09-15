@@ -55,11 +55,27 @@ struct LibraryUpdateCellView: View {
 			HStack(spacing: 18) {
 				FRAppIconView(app: _app, size: 57)
 
-				NBTitleWithSubtitleView(
-					title: _title,
-					subtitle: _desc,
-					linelimit: 0
-				)
+				VStack(alignment: .leading, spacing: 2) {
+					Text(_title)
+						.font(.headline)
+						.foregroundColor(.primary)
+						.lineLimit(1)
+
+					Text(verbatim: "\(_localVersion ?? .localized("Unknown")) → \(_remoteVersion)")
+						.font(.subheadline)
+						.foregroundColor(.secondary)
+						.lineLimit(1)
+						.minimumScaleFactor(0.8)
+
+					if let details = _details {
+						Text(verbatim: details)
+							.font(.caption)
+							.foregroundColor(.secondary)
+							.lineLimit(1)
+					}
+				}
+				.padding(.vertical, 2)
+				.frame(maxWidth: .infinity, alignment: .leading)
 
 				_updateButton
 			}
@@ -80,15 +96,15 @@ struct LibraryUpdateCellView: View {
 		.animation(.easeInOut(duration: 0.3), value: _download() != nil)
 	}
 
-	private var _desc: String {
-		var parts = ["\(_localVersion ?? .localized("Unknown")) → \(_remoteVersion)"]
+	private var _details: String? {
+		var parts: [String] = []
 		if let date = _versionDate {
 			parts.append(date.formatted(date: .abbreviated, time: .omitted))
 		}
 		if let size = _size, size > 0 {
 			parts.append(ByteCountFormatter.string(fromByteCount: size, countStyle: .file))
 		}
-		return parts.joined(separator: " • ")
+		return parts.isEmpty ? nil : parts.joined(separator: " • ")
 	}
 
 	private var _releaseNotes: String? {

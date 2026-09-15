@@ -1,14 +1,19 @@
-# Feather
-
 [![GitHub Release](https://img.shields.io/github/v/release/seomin0610/Feather?include_prereleases)](https://github.com/seomin0610/Feather/releases)
 [![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/seomin0610/Feather/total)](https://github.com/seomin0610/Feather/releases)
 [![GitHub License](https://img.shields.io/github/license/seomin0610/Feather?color=%23C96FAD)](https://github.com/seomin0610/Feather/blob/main/LICENSE)
 
-This app allows you to install and manage applications contained in a single app, using certificate pairs and various installation techniques to allow apps to install to your device. This is an entirely stock application and uses built-in features to be able to do this!
+<div align="center">
 
-<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="Images/Image-dark.png"><source media="(prefers-color-scheme: light)" srcset="Images/Image-light.png"><img alt="Feather" src="Images/Image-light.png"></picture></p>
+<img title="Feather" alt="Feather" height="180" src="landing.png">
 
-### Features
+Sideloading app meant for developer certificates.
+
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="demo-dark.png"><source media="(prefers-color-scheme: light)" srcset="demo-light.png"><img alt="Feather" src="demo-light.png"></picture></p>
+
+
+</div>
+
+## Features
 
 - User friendly, and clean UI.
 - Sign and install applications.
@@ -33,9 +38,13 @@ Visit [releases](https://github.com/seomin0610/Feather/releases) and get the lat
    <img src="https://github.com/CelloSerenity/altdirect/blob/main/assets/png/Download_Blue.png?raw=true" alt="Download .ipa" width="200">
 </a>
 
-## How does it work?
+## Translating
 
-Visit the [HOW IT WORKS](./HOW_IT_WORKS.md) page.
+Impactor now has translation support, all localizations are located in `Feather/Resources/Localizable.xcstrings`.
+
+To add a new language, open Xcode and use the interface to add/contribute to languages.
+
+To properly contribute and test potentially test localizations, you can head over to the [contributing guide](./CONTRIBUTING.md).
 
 ## Acknowledgements
 

@@ -129,6 +129,30 @@ final class AppFileHandler: NSObject, @unchecked Sendable {
 				kind: .imported,
 				provenance: sourceProvenance
 			)
+
+			let sourceAppIdentifier = sourceProvenance.sourceAppIdentifier
+			let installedVersion = sourceProvenance.sourceAppVersion
+			await MainActor.run {
+				UpdateManager.shared.removeUpdates(
+					sourceAppIdentifier: sourceAppIdentifier,
+					installedVersion: installedVersion
+				)
+			}
+		}
+
+		Storage.shared.deleteOutdatedApps(
+			identifier: bundle?.bundleIdentifier,
+			version: bundle?.version,
+			excluding: _uuid,
+			signed: false
+		)
+
+		// updates from the library go straight to signing, then install
+		if _download?.id.hasPrefix(AppUpdate.downloadIDPrefix) == true {
+			let uuid = _uuid
+			DispatchQueue.main.async {
+				NotificationCenter.default.post(name: Notification.Name("Feather.signUpdatedApp"), object: uuid)
+			}
 		}
 	}
 	

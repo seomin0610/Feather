@@ -36,9 +36,12 @@ struct SigningView: View {
 	}
 	
 	var app: AppInfoPresentable
-	
-	init(app: AppInfoPresentable) {
+	/// Always installs after signing, regardless of the saved option.
+	var signAndInstall: Bool
+
+	init(app: AppInfoPresentable, signAndInstall: Bool = false) {
 		self.app = app
+		self.signAndInstall = signAndInstall
 		let storedCert = UserDefaults.standard.integer(forKey: "feather.selectedCert")
 		__temporaryCertificate = State(initialValue: storedCert)
 	}
@@ -67,7 +70,10 @@ struct SigningView: View {
 							Button {
 								_start()
 							} label: {
-								NBSheetButton(title: .localized("Start Signing"), style: .prominent)
+								NBSheetButton(
+									title: signAndInstall ? .localized("Sign & Install") : .localized("Start Signing"),
+									style: .prominent
+								)
 									.padding()
 							}
 							.buttonStyle(.plain)
@@ -275,13 +281,42 @@ extension SigningView {
 			return
 		}
 
+		// Feather must keep its bundle identifier to update itself, so ask before signing with the PPQ suffix
+		if
+			let identifier = app.identifier,
+			identifier == Bundle.main.bundleIdentifier,
+			_temporaryOptions.appIdentifier == "\(identifier).\(_optionsManager.options.ppqString)"
+		{
+			let disable = UIAlertAction(title: .localized("Turn Off PPQ Protection"), style: .default) { _ in
+				var options = _temporaryOptions
+				options.appIdentifier = nil
+				_temporaryOptions = options
+				_sign(using: options)
+			}
+			let keep = UIAlertAction(title: .localized("Keep PPQ Protection"), style: .default) { _ in
+				_sign(using: _temporaryOptions)
+			}
+			let cancel = UIAlertAction(title: .localized("Cancel"), style: .cancel)
+
+			UIAlertController.showAlert(
+				title: .localized("PPQ Protection"),
+				message: .localized("To update %@, its bundle identifier must stay the same. If PPQ protection is kept, it will be installed as a separate app.", arguments: Bundle.main.name),
+				actions: [disable, keep, cancel]
+			)
+			return
+		}
+
+		_sign(using: _temporaryOptions)
+	}
+
+	private func _sign(using options: Options) {
 		let generator = UIImpactFeedbackGenerator(style: .light)
 		generator.impactOccurred()
 		_isSigning = true
 		
 		FR.signPackageFile(
 			app,
-			using: _temporaryOptions,
+			using: options,
 			icon: appIcon,
 			certificate: _selectedCert()
 		) { error in
@@ -303,7 +338,7 @@ extension SigningView {
 					Storage.shared.deleteApp(for: app)
 				}
 				
-				if _temporaryOptions.post_installAppAfterSigned {
+				if _temporaryOptions.post_installAppAfterSigned || signAndInstall {
 					DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
 						NotificationCenter.default.post(name: Notification.Name("Feather.installApp"), object: nil)
 					}

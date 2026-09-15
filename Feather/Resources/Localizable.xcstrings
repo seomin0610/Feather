@@ -1827,6 +1827,23 @@
         }
       }
     },
+    "Available Updates" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Available Updates"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사용 가능한 업데이트"
+          }
+        }
+      }
+    },
     "Bad Password" : {
       "comment" : "Bad certificate password",
       "extractionState" : "manual",
@@ -7608,6 +7625,91 @@
         }
       }
     },
+    "Keep PPQ Protection" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep PPQ Protection"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PPQ 보호 유지"
+          }
+        }
+      }
+    },
+    "Sign & Install" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign & Install"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서명 후 설치"
+          }
+        }
+      }
+    },
+    "To update %@, its bundle identifier must stay the same. If PPQ protection is kept, it will be installed as a separate app." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To update %@, its bundle identifier must stay the same. If PPQ protection is kept, it will be installed as a separate app."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@을(를) 업데이트하려면 번들 ID가 그대로여야 합니다. PPQ 보호를 유지하면 별도의 앱으로 설치됩니다."
+          }
+        }
+      }
+    },
+    "Turn Off PPQ Protection" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn Off PPQ Protection"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PPQ 보호 끄고 서명"
+          }
+        }
+      }
+    },
+    "Update All" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update All"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "모두 업데이트"
+          }
+        }
+      }
+    },
     "idevice" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13180,6 +13282,57 @@
         }
       }
     },
+    "Replace Apps on Update" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replace Apps on Update"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "업데이트 시 기존 앱 교체"
+          }
+        }
+      }
+    },
+    "Replace Same Version" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replace Same Version"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "같은 버전도 교체"
+          }
+        }
+      }
+    },
+    "Replace Signed Apps" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replace Signed Apps"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서명된 앱도 교체"
+          }
+        }
+      }
+    },
     "Replace Substrate with ElleKit" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -18463,6 +18616,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "更新内容"
+          }
+        }
+      }
+    },
+    "When a new version of an app is added to your library, older copies with the same bundle identifier will be deleted." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When a new version of an app is added to your library, older copies with the same bundle identifier will be deleted."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "라이브러리에 앱의 새 버전이 추가되면 번들 ID가 같은 기존 앱이 삭제됩니다."
           }
         }
       }

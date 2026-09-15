@@ -14,7 +14,8 @@ struct ExtendedTabbarView: View {
 	@Environment(\.horizontalSizeClass) var horizontalSizeClass
 	@AppStorage("Feather.tabCustomization") var customization = TabViewCustomization()
 	@StateObject var viewModel = SourcesViewModel.shared
-	
+	@StateObject private var updateManager = UpdateManager.shared
+
 	@State private var _isAddingPresenting = false
 	
 	@FetchRequest(
@@ -29,8 +30,9 @@ struct ExtendedTabbarView: View {
 				Tab(tab.title, systemImage: tab.icon) {
 					TabEnum.view(for: tab)
 				}
+				.badge(tab == .library ? updateManager.updateCount : 0)
 			}
-			
+
 			ForEach(TabEnum.customizableTabs, id: \.hashValue) { tab in
 				Tab(tab.title, systemImage: tab.icon) {
 					TabEnum.view(for: tab)
@@ -73,6 +75,9 @@ struct ExtendedTabbarView: View {
 		}
 		.tabViewStyle(.sidebarAdaptable)
 		.tabViewCustomization($customization)
+		.task {
+			await updateManager.checkForUpdatesIfNeeded()
+		}
 		.sheet(isPresented: $_isAddingPresenting) {
 			SourcesAddView()
 				.presentationDetents([.medium])

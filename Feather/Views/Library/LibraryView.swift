@@ -22,7 +22,8 @@ struct LibraryView: View {
 	@State private var _alertDownloadString: String = "" // for _isDownloadingPresenting
 	@State private var _updateCheckRotation = 0.0
 	@State private var _isUpdateCheckCompleteVisible = false
-	
+	@State private var _pendingSignUpdateUUIDs: [String] = []
+
 	// MARK: Selection State
 	@State private var _selectedAppUUIDs: Set<String> = []
 	@State private var _editMode: EditMode = .inactive
@@ -72,6 +73,42 @@ struct LibraryView: View {
 	var body: some View {
 		NBNavigationView(.localized("Library")) {
 			NBListAdaptable {
+				if
+					_updateCount > 0,
+					_searchText.isEmpty,
+					_selectedScope == .all
+				{
+					Section {
+						if let featherUpdate = updateManager.featherUpdate {
+							LibraryUpdateCellView(featherUpdate: featherUpdate)
+						}
+
+						ForEach(_pendingUpdates) { update in
+							LibraryUpdateCellView(update: update, app: _app(for: update))
+						}
+					} header: {
+						HStack(alignment: .center, spacing: 4) {
+							Text(.localized("Available Updates"))
+								.fontWeight(.bold)
+								.font(.title2)
+								.foregroundStyle(.primary)
+
+							Spacer()
+
+							if _updateCount > 1 {
+								Button(.localized("Update All")) {
+									updateManager.updateAll()
+								}
+								.font(.subheadline.bold())
+								.buttonStyle(.borderless)
+							}
+						}
+						.textCase(nil)
+						.offset(y: 2)
+					}
+					.headerProminence(.increased)
+				}
+
 				if
 					!_filteredSignedApps.isEmpty,
 					_selectedScope == .all || _selectedScope == .signed
@@ -193,7 +230,7 @@ struct LibraryView: View {
 					.presentationDragIndicator(.visible)
 			}
 			.fullScreenCover(item: $_selectedSigningAppPresenting) { app in
-				SigningView(app: app.base)
+				SigningView(app: app.base, signAndInstall: app.signAndInstall)
 					.compatNavigationTransition(id: app.base.uuid ?? "", ns: _namespace)
 			}
 			.sheet(isPresented: $_isImportingPresenting) {
@@ -228,6 +265,17 @@ struct LibraryView: View {
 				if let latest = _signedApps.first {
 					_selectedInstallAppPresenting = AnyApp(base: latest)
 				}
+			}
+			.onReceive(NotificationCenter.default.publisher(for: Notification.Name("Feather.signUpdatedApp"))) { notification in
+				guard let uuid = notification.object as? String else { return }
+				_pendingSignUpdateUUIDs.append(uuid)
+				_presentNextSignUpdate()
+			}
+			.onChange(of: _selectedSigningAppPresenting?.id) { _ in
+				_presentNextSignUpdate()
+			}
+			.onChange(of: _selectedInstallAppPresenting?.id) { _ in
+				_presentNextSignUpdate()
 			}
 			.onChange(of: _editMode) { mode in
 				if mode == .inactive {
@@ -284,7 +332,47 @@ extension LibraryView {
 		
 		return allApps
 	}
-	
+
+	private var _pendingUpdates: [AppUpdate] {
+		let uuids = Set(_signedApps.compactMap(\.uuid) + _importedApps.compactMap(\.uuid))
+		return updateManager.pendingUpdates.filter { uuids.contains($0.localUUID) }
+	}
+
+	/// Presents signing for downloaded updates one at a time, waiting for any signing or install sheet to close.
+	private func _presentNextSignUpdate() {
+		// the install sheet appears shortly after signing dismisses, so give it time before checking
+		DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+			guard
+				_selectedSigningAppPresenting == nil,
+				_selectedInstallAppPresenting == nil,
+				!_pendingSignUpdateUUIDs.isEmpty
+			else {
+				return
+			}
+
+			let uuid = _pendingSignUpdateUUIDs.removeFirst()
+			let request: NSFetchRequest<Imported> = Imported.fetchRequest()
+			request.predicate = NSPredicate(format: "uuid == %@", uuid)
+			request.fetchLimit = 1
+
+			guard let app = try? Storage.shared.context.fetch(request).first else {
+				_presentNextSignUpdate()
+				return
+			}
+
+			_selectedSigningAppPresenting = AnyApp(base: app, signAndInstall: true)
+		}
+	}
+
+	private var _updateCount: Int {
+		_pendingUpdates.count + (updateManager.featherUpdate == nil ? 0 : 1)
+	}
+
+	private func _app(for update: AppUpdate) -> AppInfoPresentable? {
+		_importedApps.first { $0.uuid == update.localUUID }
+			?? _signedApps.first { $0.uuid == update.localUUID }
+	}
+
 	private func _checkForUpdates() async {
 		let localApps = _signedApps.map { $0 as AppInfoPresentable } + _importedApps.map { $0 as AppInfoPresentable }
 		await updateManager.checkForUpdates(

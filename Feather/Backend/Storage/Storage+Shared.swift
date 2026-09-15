@@ -22,6 +22,11 @@ extension Storage {
 	}
 	
 	func deleteApp(for app: AppInfoPresentable) {
+		let uuid = app.uuid
+		Task { @MainActor in
+			UpdateManager.shared.removeUpdate(for: uuid)
+		}
+
 		do {
 			if let url = getUuidDirectory(for: app) {
 				try? FileManager.default.removeItem(at: url)
@@ -34,6 +39,45 @@ extension Storage {
 		}
 	}
 	
+	/// Deletes older apps of the same kind sharing a bundle identifier, when "Replace Apps on Update" is enabled.
+	func deleteOutdatedApps(identifier: String?, version: String?, excluding uuid: String, signed: Bool) {
+		let defaults = UserDefaults.standard
+		let replaceSameVersion = defaults.object(forKey: "Feather.replaceAppsOnUpdate.sameVersion") as? Bool ?? true
+		let replaceSigned = defaults.object(forKey: "Feather.replaceAppsOnUpdate.signed") as? Bool ?? true
+
+		guard
+			defaults.bool(forKey: "Feather.replaceAppsOnUpdate"),
+			!signed || replaceSigned,
+			let identifier,
+			!identifier.isEmpty
+		else {
+			return
+		}
+
+		context.perform {
+			var predicates = [NSPredicate(format: "identifier == %@ AND uuid != %@", identifier, uuid)]
+			if !replaceSameVersion {
+				predicates.append(NSPredicate(format: "NOT (version == %@)", version ?? NSNull()))
+			}
+			let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+			let apps: [AppInfoPresentable]
+
+			if signed {
+				let request: NSFetchRequest<Signed> = Signed.fetchRequest()
+				request.predicate = predicate
+				apps = (try? self.context.fetch(request)) ?? []
+			} else {
+				let request: NSFetchRequest<Imported> = Imported.fetchRequest()
+				request.predicate = predicate
+				apps = (try? self.context.fetch(request)) ?? []
+			}
+
+			for app in apps {
+				self.deleteApp(for: app)
+			}
+		}
+	}
+
 	func getCertificate(from app: AppInfoPresentable) -> CertificatePair? {
 		if let signed = app as? Signed {
 			return signed.certificate
@@ -46,7 +90,8 @@ extension Storage {
 struct AnyApp: Identifiable {
 	let base: AppInfoPresentable
 	var archive: Bool = false
-	
+	var signAndInstall: Bool = false
+
 	var id: String {
 		base.uuid ?? UUID().uuidString
 	}

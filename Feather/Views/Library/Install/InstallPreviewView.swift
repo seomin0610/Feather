@@ -7,6 +7,7 @@
 
 import SwiftUI
 import NimbleViews
+import NimbleExtensions
 import IDeviceSwift
 import OSLog
 
@@ -136,13 +137,10 @@ struct InstallPreviewView: View {
 	}
 	
 	private func _install() {
-		guard isSharing || app.identifier != Bundle.main.bundleIdentifier! || _installationMethod == 1 else {
-			UIAlertController.showAlertWithOk(
-				title: .localized("Install"),
-				message: .localized("You cannot update ‘%@‘ with itself, please use an alternative tool to update it.", arguments: Bundle.main.name)
-			)
-			return
-		}
+		// Feather can't serve itself to itself, so its own installs go through the signer server
+		let installsThroughServer = !isSharing
+			&& _installationMethod == 0
+			&& app.identifier == Bundle.main.bundleIdentifier
 				
 		Task.detached {
 			do {
@@ -152,7 +150,9 @@ struct InstallPreviewView: View {
 				let packageUrl = try await handler.archive()
 				
 				if await !isSharing {
-					if await _installationMethod == 0 {
+					if installsThroughServer {
+						try await _installThroughServer(packageUrl)
+					} else if await _installationMethod == 0 {
 						await MainActor.run {
 							installer.packageUrl = packageUrl
 							viewModel.status = .ready
@@ -205,6 +205,31 @@ struct InstallPreviewView: View {
 		}
 	}
 	
+	/// Uploads the package to the signer server, opens the OTA install link, then leaves the app so it can be replaced.
+	private func _installThroughServer(_ packageUrl: URL) async throws {
+		await MainActor.run {
+			viewModel.status = .sendingPayload
+		}
+
+		let manifest = try await FeatherServerInstaller.upload(ipa: packageUrl) { progress in
+			Task { @MainActor in
+				viewModel.installProgress = progress
+			}
+		}
+
+		Logger.misc.info("Server manifest ready, remaining today: \(manifest.remainingToday ?? -1)")
+
+		await MainActor.run {
+			viewModel.installProgress = 1.0
+			viewModel.status = .completed(.success(()))
+			UIApplication.shared.open(manifest.installUrl)
+
+			DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+				UIApplication.shared.suspend()
+			}
+		}
+	}
+
 	private func startInstallProgressPolling(
 		bundleID: String,
 		viewModel: InstallerStatusViewModel

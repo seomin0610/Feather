@@ -150,10 +150,11 @@ final class SigningHandler: NSObject {
 		guard let appUrl = _fileManager.getPath(in: app, for: "app") else {
 			return
 		}
-		
+
+		let bundle = Bundle(url: appUrl)
+
 		await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-			let bundle = Bundle(url: appUrl)
-			
+
 			Storage.shared.addSigned(
 				uuid: _uuid,
 				source: _app.source,
@@ -172,6 +173,14 @@ final class SigningHandler: NSObject {
 			from: _app.uuid,
 			to: _uuid,
 			kind: .signed
+		)
+
+		// after copying metadata, since the source app itself may be an outdated signed app
+		Storage.shared.deleteOutdatedApps(
+			identifier: bundle?.bundleIdentifier,
+			version: bundle?.version,
+			excluding: _uuid,
+			signed: true
 		)
 	}
 	

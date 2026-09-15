@@ -14,6 +14,7 @@ struct LibraryCellView: View {
 	@Environment(\.horizontalSizeClass) private var horizontalSizeClass
 	@Environment(\.editMode) private var editMode
 	@ObservedObject private var updateManager = UpdateManager.shared
+	@ObservedObject private var downloadManager = DownloadManager.shared
 	@State private var _signedUpdateConfirmation: AppUpdate?
 	@State private var _isSignedUpdateConfirmationPresented = false
 
@@ -210,7 +211,9 @@ extension LibraryCellView {
 	private func _buttonActions(for app: AppInfoPresentable) -> some View {
 		Group {
 			if let update = updateManager.update(for: app) {
-				if app.isSigned {
+				if let download = updateManager.download(for: update) {
+					UpdateDownloadProgressView(download: download)
+				} else if app.isSigned {
 					Button {
 						_signedUpdateConfirmation = update
 						_isSignedUpdateConfirmationPresented = true
@@ -258,10 +261,6 @@ extension LibraryCellView {
 	}
 	
 	private func _startUpdateDownload(_ update: AppUpdate) {
-		_ = DownloadManager.shared.startDownload(
-			from: update.downloadURL,
-			id: "FeatherManualDownload_Update_\(update.localUUID)",
-			sourceProvenance: update.sourceProvenance
-		)
+		updateManager.startUpdate(update)
 	}
 }

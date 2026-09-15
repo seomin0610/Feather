@@ -4,65 +4,108 @@ on:
   release:
     types: [published]
   workflow_dispatch:
-    
+    inputs:
+      tag:
+        description: "Release tag to add (e.g. v2.9.1)"
+        required: true
+
 permissions:
   contents: write
-    
+
 jobs:
-  build:
-    runs-on: macos-latest
+  update:
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: main
 
-      - name: Dependencies
-        run: brew install jq
+      - name: Read release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        run: |
+          set -euo pipefail
+
+          VERSION="${TAG#v}"
+          if [[ -z "$TAG" || -z "$VERSION" ]]; then
+            echo "::error::Release tag is empty or has no version: '$TAG'"
+            exit 1
+          fi
+
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json publishedAt,body,assets > "$RUNNER_TEMP/release.json"
+
+          SIZE=$(jq -r '.assets[] | select(.name == "Feather.ipa") | .size' "$RUNNER_TEMP/release.json")
+          if [[ -z "$SIZE" ]]; then
+            echo "::error::Feather.ipa is not attached to release $TAG"
+            exit 1
+          fi
+
+          DATE=$(jq -r '.publishedAt // empty' "$RUNNER_TEMP/release.json")
+          if [[ -z "$DATE" ]]; then
+            DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          fi
+
+          {
+            echo "TAG=$TAG"
+            echo "VERSION=$VERSION"
+            echo "SIZE=$SIZE"
+            echo "DATE=$DATE"
+          } >> "$GITHUB_ENV"
 
       - name: Update app-repo.json
         run: |
-          TAG="${{ github.event.release.tag_name }}"
-          DATE="${{ github.event.release.published_at }}"
-          VERSION="${TAG#v}"
-          NEWS_DATE="${DATE%%T*}"
-          UPDATE_URL="https://signer.waterwave.space"
+          set -euo pipefail
 
-          DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/Feather.ipa"
+          DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/Feather.ipa"
 
+          # re-running for the same version replaces its entries instead of duplicating them
           jq \
             --arg version "$VERSION" \
             --arg date "$DATE" \
             --arg url "$DOWNLOAD_URL" \
-            --arg newsDate "$NEWS_DATE" \
-            --arg updateUrl "$UPDATE_URL" \
+            --argjson size "$SIZE" \
+            --arg newsDate "${DATE%%T*}" \
+            --arg updateUrl "https://signer.waterwave.space" \
+            --slurpfile release "$RUNNER_TEMP/release.json" \
             '
+            ($release[0].body // "") as $notes |
+            ("feather-update-" + $version) as $newsID |
+            ({version: $version, date: $date, size: $size, downloadURL: $url}
+              + (if $notes == "" then {} else {localizedDescription: $notes} end)) as $entry |
             .apps[0].version = $version |
             .apps[0].versionDate = $date |
+            .apps[0].size = $size |
             .apps[0].downloadURL = $url |
-            .apps[0].versions = [{version: $version, date: $date, downloadURL: $url}] + .apps[0].versions |
+            .apps[0].versions = [$entry] + ((.apps[0].versions // []) | map(select(.version != $version))) |
             .news = [{
               title: ("Feather " + $version + " 업데이트"),
-              identifier: ("feather-update-" + $version),
-              caption: ("Feather has been updated to version " + $version + ". Visit " + "Web signer" + " to update."),
+              identifier: $newsID,
+              caption: ("Feather has been updated to version " + $version + ". Visit Web signer to update."),
               tintColor: "8A28F7",
               url: $updateUrl,
               date: $newsDate,
               notify: true
-            }] + .news
-            ' app-repo.json > tmp.json
+            }] + ((.news // []) | map(select(.identifier != $newsID)))
+            ' app-repo.json > "$RUNNER_TEMP/app-repo.json"
 
-          mv tmp.json app-repo.json
+          mv "$RUNNER_TEMP/app-repo.json" app-repo.json
 
       - name: Commit and push changes
         run: |
+          set -euo pipefail
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add app-repo.json
 
-          git diff --cached --quiet && echo "No changes" && exit 0
+          if git diff --cached --quiet; then
+            echo "No changes"
+            exit 0
+          fi
 
-          git commit -m "chore: update repo for ${{ github.event.release.tag_name }}"
-
+          git commit -m "chore: update repo for ${TAG}"
+          git pull --rebase origin main
           git push origin main

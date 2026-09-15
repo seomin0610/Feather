@@ -9,29 +9,42 @@ on:
 jobs:
   build:
     runs-on: macos-latest
-    permissions: write-all
+    permissions:
+      contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: 'true'
+          # full history for a numeric build number
+          fetch-depth: 0
 
       - name: Select Xcode
         run: |
           sudo xcode-select -s /Applications/Xcode_26.3.0.app
 
+      # MARKETING_VERSION comes from Feather.xcconfig, which agvtool can't read,
+      # so take the version from the tag (or the xcconfig when run manually)
+      - name: Extract Version
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION=$(sed -n 's/^FEATHER_PROJECT_VERSION *= *//p' Feather.xcconfig | tr -d '[:space:]')
+          fi
+          if [[ -z "$VERSION" ]]; then
+            echo "::error::Could not determine the version"
+            exit 1
+          fi
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+
       - name: Compile Feather
-        run: | 
-          agvtool new-version -all $(git rev-parse HEAD)
+        run: |
+          agvtool new-version -all "$(git rev-list --count HEAD)"
           make
           mkdir upload
           mv packages/* upload/
-
-      - name: Extract Version
-        id: get_version
-        run: |
-          VERSION=$(agvtool what-marketing-version -terse1)
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -44,4 +57,4 @@ jobs:
           fail_on_unmatched_files: true
           draft: true
         env:
-          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

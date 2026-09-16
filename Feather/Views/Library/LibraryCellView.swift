@@ -119,7 +119,7 @@ struct LibraryCellView: View {
 			Button(.localized("Cancel"), role: .cancel) {}
 		} message: {
 			if let update = _signedUpdateConfirmation {
-				Text("\(update.appName) \(update.remoteVersion)")
+				Text(verbatim: "\(update.appName) \(update.remoteVersion)")
 			}
 		}
 	}

@@ -21,6 +21,8 @@ final class Storage: ObservableObject {
 		if inMemory {
 			container.persistentStoreDescriptions.first?.url =
 				URL(fileURLWithPath: "/dev/null")
+		} else {
+			_migrateFeatherPlusStoreIfPending()
 		}
 		
 		container.persistentStoreDescriptions.first?.shouldMigrateStoreAutomatically = true
@@ -31,6 +33,50 @@ final class Storage: ObservableObject {
 		container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
 	}
 
+	// MARK: FeatherPlus
+	/// FeatherPlus keeps its database in Documents, Feather keeps it in Application Support.
+	/// If this file exists, the previous install was FeatherPlus and its data has not been migrated yet.
+	static let featherPlusStoreURL = URL.documentsDirectory.appendingPathComponent("Feather.sqlite")
+	static let featherPlusMigrationDeclinedKey = "Feather.featherPlusMigrationDeclined"
+	static let pendingFeatherPlusMigrationKey = "Feather.pendingFeatherPlusMigration"
+	
+	static var hasFeatherPlusData: Bool {
+		FileManager.default.fileExists(atPath: featherPlusStoreURL.path)
+	}
+	
+	/// Runs before the store is loaded, so no live objects point at the replaced store.
+	private func _migrateFeatherPlusStoreIfPending() {
+		let defaults = UserDefaults.standard
+		guard
+			defaults.bool(forKey: Self.pendingFeatherPlusMigrationKey),
+			Self.hasFeatherPlusData,
+			let destination = container.persistentStoreDescriptions.first?.url
+		else {
+			return
+		}
+		
+		defaults.removeObject(forKey: Self.pendingFeatherPlusMigrationKey)
+		
+		do {
+			try FileManager.default.createDirectoryIfNeeded(at: destination.deletingLastPathComponent())
+			try container.persistentStoreCoordinator.replacePersistentStore(
+				at: destination,
+				destinationOptions: nil,
+				withPersistentStoreFrom: Self.featherPlusStoreURL,
+				sourceOptions: nil,
+				ofType: NSSQLiteStoreType
+			)
+		} catch {
+			print("Failed to migrate FeatherPlus database: \(error)")
+			return
+		}
+		
+		let base = Self.featherPlusStoreURL.deletingPathExtension()
+		for ext in ["sqlite", "sqlite-wal", "sqlite-shm"] {
+			try? FileManager.default.removeItem(at: base.appendingPathExtension(ext))
+		}
+	}
+	
 	var context: NSManagedObjectContext {
 		container.viewContext
 	}

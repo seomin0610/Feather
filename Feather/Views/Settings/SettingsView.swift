@@ -89,6 +89,19 @@ struct SettingsView: View {
 				} footer: {
 					Text(.localized("Reset the applications sources, certificates, apps, and general contents."))
 				}
+				
+				if Storage.hasFeatherPlusData {
+					Section {
+						Button(.localized("Migrate from FeatherPlus"), systemImage: "arrow.down.doc") {
+							ResetView.resetAlert(
+								title: .localized("Migrate from FeatherPlus"),
+								message: .localized("FeatherPlus data was found. Migrating replaces the current apps, certificates and sources with it and restarts the app.")
+							) {
+								UserDefaults.standard.set(true, forKey: Storage.pendingFeatherPlusMigrationKey)
+							}
+						}
+					}
+				}
 			}
 		}
 	}

@@ -19,6 +19,9 @@ struct FeatherApp: App {
 	@StateObject var downloadManager = DownloadManager.shared
 	let storage = Storage.shared
 	
+	@State private var _isFeatherPlusMigrationPresenting = Storage.hasFeatherPlusData
+		&& !UserDefaults.standard.bool(forKey: Storage.featherPlusMigrationDeclinedKey)
+	
 	var body: some Scene {
 		WindowGroup {
 			VStack {
@@ -30,6 +33,17 @@ struct FeatherApp: App {
 					.transition(.move(edge: .top).combined(with: .opacity))
 			}
 			.animation(.smooth, value: downloadManager.manualDownloads.description)
+			.alert(.localized("Migrate from FeatherPlus"), isPresented: $_isFeatherPlusMigrationPresenting) {
+				Button(.localized("Migrate")) {
+					UserDefaults.standard.set(true, forKey: Storage.pendingFeatherPlusMigrationKey)
+					UIApplication.shared.suspendAndReopen()
+				}
+				Button(.localized("No"), role: .cancel) {
+					UserDefaults.standard.set(true, forKey: Storage.featherPlusMigrationDeclinedKey)
+				}
+			} message: {
+				Text(.localized("FeatherPlus data was found. Migrating replaces the current apps, certificates and sources with it and restarts the app."))
+			}
 			.onReceive(NotificationCenter.default.publisher(for: .heartbeatInvalidHost)) { _ in
 				DispatchQueue.main.async {
 					UIAlertController.showAlertWithOk(

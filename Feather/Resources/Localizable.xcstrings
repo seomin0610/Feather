@@ -5890,6 +5890,23 @@
         }
       }
     },
+    "FeatherPlus data was found. Migrating replaces the current apps, certificates and sources with it and restarts the app." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FeatherPlus data was found. Migrating replaces the current apps, certificates and sources with it and restarts the app."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FeatherPlus 데이터가 발견되었습니다. 마이그레이션하면 현재 앱, 인증서, 소스가 FeatherPlus 데이터로 대체되고 앱이 재시작됩니다."
+          }
+        }
+      }
+    },
     "Featured" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7638,6 +7655,57 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "PPQ 보호 유지"
+          }
+        }
+      }
+    },
+    "Migrate" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Migrate"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "마이그레이션"
+          }
+        }
+      }
+    },
+    "Migrate from FeatherPlus" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Migrate from FeatherPlus"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FeatherPlus에서 마이그레이션"
+          }
+        }
+      }
+    },
+    "No" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "아니요"
           }
         }
       }

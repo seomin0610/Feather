@@ -9,6 +9,7 @@ import Foundation
 import Combine
 import UIKit.UIImpactFeedbackGenerator
 import BackgroundTasks
+import NimbleExtensions
 
 class Download: Identifiable, @unchecked Sendable {
 	@Published var progress: Double = 0.0
@@ -177,9 +178,9 @@ extension DownloadManager: URLSessionDownloadDelegate {
 	
 	func handlePachageFile(url: URL, dl: Download) throws {
 		FR.handlePackageFile(url, download: dl) { err in
-			if err != nil {
-				let generator = UINotificationFeedbackGenerator()
-				generator.notificationOccurred(.error)
+			if let err {
+				self._fail(dl, with: err)
+				return
 			}
 			
 			DispatchQueue.main.async {
@@ -205,6 +206,15 @@ extension DownloadManager: URLSessionDownloadDelegate {
 		let customTempDir = tempDirectory.appendingPathComponent("FeatherDownloads", isDirectory: true)
 		
 		do {
+			if
+				let response = downloadTask.response as? HTTPURLResponse,
+				!(200..<300).contains(response.statusCode)
+			{
+				throw URLError(.badServerResponse, userInfo: [
+					NSLocalizedDescriptionKey: "HTTP \(response.statusCode) \(HTTPURLResponse.localizedString(forStatusCode: response.statusCode))"
+				])
+			}
+			
 			try FileManager.default.createDirectoryIfNeeded(at: customTempDir)
 			
 			// Use the server-suggested filename if available, otherwise fallback
@@ -216,7 +226,7 @@ extension DownloadManager: URLSessionDownloadDelegate {
 			
 			try handlePachageFile(url: destinationURL, dl: download)
 		} catch {
-			print("Error handling downloaded file: \(error.localizedDescription)")
+			_fail(download, with: error)
 		}
 	}
 	
@@ -240,17 +250,30 @@ extension DownloadManager: URLSessionDownloadDelegate {
 	
 	func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
 		guard
-			let _ = error,
+			let error,
+			(error as? URLError)?.code != .cancelled,
 			let downloadTask = task as? URLSessionDownloadTask,
 			let download = getDownloadTask(by: downloadTask)
 		else {
 			return
 		}
 		
+		_fail(download, with: error)
+	}
+	
+	private func _fail(_ download: Download, with error: Error) {
 		DispatchQueue.main.async {
-			if let index = self.getDownloadIndex(by: download.id) {
-				self.downloads.remove(at: index)
-			}
+			// already gone means the user cancelled it
+			guard self.getDownload(by: download.id) != nil else { return }
+			self.cancelDownload(download)
+			
+			UINotificationFeedbackGenerator().notificationOccurred(.error)
+			guard let presenter = UIApplication.topViewController() else { return }
+			UIAlertController.showAlertWithOk(
+				presenter,
+				title: .localized("Download Failed"),
+				message: "\(download.sourceProvenance?.sourceAppName ?? download.fileName)\n\n\(error.localizedDescription)"
+			)
 		}
 	}
 }

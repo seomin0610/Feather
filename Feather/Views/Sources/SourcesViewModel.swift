@@ -20,8 +20,9 @@ final class SourcesViewModel: ObservableObject {
 	
 	var isFinished = true
 	@Published var sources: [AltSource: ASRepository] = [:]
+	@Published var errors: [AltSource: Error] = [:]
 	
-	func fetchSources(_ sources: FetchedResults<AltSource>, refresh: Bool = false, batchSize: Int = 4) async {
+	func fetchSources(_ sources: some Collection<AltSource>, refresh: Bool = false, batchSize: Int = 4) async {
 		guard isFinished else { return }
 		
 		// check if sources to be fetched are the same as before, if yes, return
@@ -32,48 +33,49 @@ final class SourcesViewModel: ObservableObject {
 		isFinished = false
 		defer { isFinished = true }
 		
-		await MainActor.run {
-			self.sources = [:]
-		}
-		
 		let sourcesArray = Array(sources)
+		
+		await MainActor.run {
+			for source in sourcesArray {
+				self.sources[source] = nil
+				self.errors[source] = nil
+			}
+		}
 		
 		for startIndex in stride(from: 0, to: sourcesArray.count, by: batchSize) {
 			let endIndex = min(startIndex + batchSize, sourcesArray.count)
 			let batch = sourcesArray[startIndex..<endIndex]
 			
-			let batchResults = await withTaskGroup(of: (AltSource, ASRepository?).self, returning: [AltSource: ASRepository].self) { group in
+			let batchResults = await withTaskGroup(of: (AltSource, RepositoryDataHandler).self, returning: [(AltSource, RepositoryDataHandler)].self) { group in
 				for source in batch {
 					group.addTask {
 						guard let url = source.sourceURL else {
-							return (source, nil)
+							return (source, .failure(URLError(.badURL)))
 						}
 						
 						return await withCheckedContinuation { continuation in
 							self._dataService.fetch(from: url) { (result: RepositoryDataHandler) in
-								switch result {
-								case .success(let repo):
-									continuation.resume(returning: (source, repo))
-								case .failure(_):
-									continuation.resume(returning: (source, nil))
-								}
+								continuation.resume(returning: (source, result))
 							}
 						}
 					}
 				}
 				
-				var results = [AltSource: ASRepository]()
-				for await (source, repo) in group {
-					if let repo {
-						results[source] = repo
-					}
+				var results = [(AltSource, RepositoryDataHandler)]()
+				for await result in group {
+					results.append(result)
 				}
 				return results
 			}
 			
 			await MainActor.run {
-				for (source, repo) in batchResults {
-					self.sources[source] = repo
+				for (source, result) in batchResults {
+					switch result {
+					case .success(let repo):
+						self.sources[source] = repo
+					case .failure(let error):
+						self.errors[source] = error
+					}
 				}
 			}
 		}

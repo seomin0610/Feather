@@ -49,6 +49,13 @@ struct SourceAppsView: View {
 	
 	var object: [AltSource]
 	@ObservedObject var viewModel: SourcesViewModel
+	
+	// only when every source failed, otherwise the ones that loaded are shown
+	private var _loadError: Error? {
+		let errors = object.compactMap { viewModel.errors[$0] }
+		return errors.count == object.count ? errors.first : nil
+	}
+
 	@State private var _sourceContexts: [SourceRepositoryContext]?
 	
 	// MARK: Body
@@ -66,6 +73,22 @@ struct SourceAppsView: View {
 					onSelect: {self._selectedRoute = $0}
 				)
 				.ignoresSafeArea()
+			} else if let _loadError {
+				VStack(spacing: 12) {
+					Text(verbatim: "⚠️")
+						.font(.system(size: 64))
+					Text(verbatim: .localized("Failed to load source (%@)", arguments: _loadError.localizedDescription))
+						.multilineTextAlignment(.center)
+						.foregroundStyle(.secondary)
+					Button(.localized("Retry"), systemImage: "arrow.clockwise") {
+						Task {
+							await viewModel.fetchSources(object, refresh: true)
+							_load()
+						}
+					}
+					.buttonStyle(.bordered)
+				}
+				.padding()
 			} else {
 				ProgressView()
 			}

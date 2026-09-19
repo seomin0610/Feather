@@ -4455,6 +4455,23 @@
         }
       }
     },
+    "Download Failed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download Failed"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다운로드 실패"
+          }
+        }
+      }
+    },
     "Download StosVPN" : {
       "comment" : "Don't translate StosVPN, this is for linking the download to the required VPN for idevice",
       "extractionState" : "manual",
@@ -5897,6 +5914,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "下载失败，请检查网络连接并重试。"
+          }
+        }
+      }
+    },
+    "Failed to load source (%@)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Failed to load source (%@)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "소스를 불러오지 못했어요 (%@)"
           }
         }
       }
@@ -7717,6 +7751,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "아니요"
+          }
+        }
+      }
+    },
+    "Retry" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retry"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 시도"
           }
         }
       }

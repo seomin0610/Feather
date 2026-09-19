@@ -13,13 +13,13 @@ jobs:
       contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: 'true'
           # full history for a numeric build number
           fetch-depth: 0
 
-      - name: Select Xcode
+      - name: Prepare dependencies (Xcode)
         run: |
           sudo xcode-select -s /Applications/Xcode_26.3.0.app
 
@@ -43,16 +43,14 @@ jobs:
         run: |
           agvtool new-version -all "$(git rev-list --count HEAD)"
           make
-          mkdir upload
-          mv packages/* upload/
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v3.0.2
         with:
           name: Feather v${{ env.VERSION }}
           tag_name: v${{ env.VERSION }}
           files: |
-            upload/*
+            packages/*
           generate_release_notes: true
           fail_on_unmatched_files: true
           draft: true

@@ -1,0 +1,411 @@
+#!/usr/bin/env python3
+"""Feather remote CLI: drive a device running Feather from a computer.
+
+Config: FEATHER_HOST / FEATHER_TOKEN, or ~/.config/feather-cli.json (see `feather login`).
+"""
+
+import argparse
+import base64
+import contextlib
+import json
+import os
+import sys
+import tempfile
+import threading
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+
+CONFIG = os.path.expanduser("~/.config/feather-cli.json")
+
+
+# MARK: progress
+# all of it goes to stderr, so piping stdout still gives clean output
+
+def live():
+    return sys.stderr.isatty()
+
+
+def bar(label, sent, total):
+    if not live():
+        return
+    share = min(1.0, sent / total) if total else 0.0
+    filled = int(share * 24)
+    sys.stderr.write("\r%-10s [%s%s] %3d%%" % (label, "#" * filled, "." * (24 - filled), share * 100))
+    sys.stderr.flush()
+
+
+def done(label, note="done"):
+    if live():
+        sys.stderr.write("\r%-10s %-40s\n" % (label, note))
+        sys.stderr.flush()
+
+
+@contextlib.contextmanager
+def waiting(label):
+    """For the steps the device does not report a percentage for."""
+    stop = threading.Event()
+
+    def spin():
+        start = time.time()
+        frames = "|/-\\"
+        tick = 0
+        while not stop.wait(0.2):
+            if live():
+                sys.stderr.write("\r%-10s %s %.0fs" % (label, frames[tick % 4], time.time() - start))
+                sys.stderr.flush()
+            tick += 1
+
+    thread = threading.Thread(target=spin, daemon=True)
+    thread.start()
+    try:
+        yield
+    finally:
+        stop.set()
+        thread.join()
+        done(label)
+
+
+class ProgressReader:
+    """File wrapper that draws a bar as http.client reads it."""
+
+    def __init__(self, path, label):
+        self._file = open(path, "rb")
+        self._label = label
+        self._total = os.path.getsize(path)
+        self._sent = 0
+
+    def read(self, size=-1):
+        chunk = self._file.read(size)
+        self._sent += len(chunk)
+        if chunk:
+            bar(self._label, self._sent, self._total)
+        elif self._sent:
+            done(self._label, "sent, device is unpacking...")
+            self._sent = 0
+        return chunk
+
+    def close(self):
+        self._file.close()
+
+
+def stream_to_file(response, path, label):
+    total = int(response.headers.get("Content-Length") or 0)
+    read = 0
+    with open(path, "wb") as f:
+        while True:
+            chunk = response.read(1 << 20)
+            if not chunk:
+                break
+            f.write(chunk)
+            read += len(chunk)
+            bar(label, read, total)
+    done(label, "%.1f MB" % (read / 1048576))
+
+
+# MARK: transport
+
+def config():
+    try:
+        with open(CONFIG) as f:
+            stored = json.load(f)
+    except (OSError, ValueError):
+        stored = {}
+
+    host = os.environ.get("FEATHER_HOST") or stored.get("host")
+    token = os.environ.get("FEATHER_TOKEN") or stored.get("token")
+    if not host or not token:
+        sys.exit("No host/token. Run: feather login http://<device-ip>:8420 <token>")
+    return host.rstrip("/"), token
+
+
+def call(method, path, body=None, upload=None, query=None, timeout=900, raw=False):
+    host, token = config()
+    url = host + path
+    if query:
+        url += "?" + urllib.parse.urlencode(query)
+
+    headers = {"Authorization": "Bearer " + token}
+    data = None
+
+    if body is not None:
+        data = json.dumps(body).encode()
+        headers["Content-Type"] = "application/json"
+    elif upload is not None:
+        data = ProgressReader(upload, "uploading")
+        headers["Content-Type"] = "application/octet-stream"
+        headers["Content-Length"] = str(os.path.getsize(upload))
+
+    request = urllib.request.Request(url, data=data, headers=headers, method=method)
+
+    try:
+        response = urllib.request.urlopen(request, timeout=timeout)
+    except urllib.error.HTTPError as error:
+        detail = error.read().decode(errors="replace")
+        try:
+            detail = json.loads(detail).get("reason", detail)
+        except ValueError:
+            pass
+        sys.exit("%s %s: %s" % (error.code, error.reason, detail))
+    except urllib.error.URLError as error:
+        sys.exit("Cannot reach %s: %s (is Feather open with Remote CLI on?)" % (host, error.reason))
+
+    if raw:
+        return response
+    payload = response.read().decode()
+    return json.loads(payload) if payload else {}
+
+
+# MARK: helpers
+
+def resolve(ref):
+    """Accepts a uuid, a uuid prefix, or part of an app name."""
+    apps = call("GET", "/v1/apps", timeout=30)["apps"]
+    matches = [a for a in apps if a["uuid"] == ref]
+    if not matches:
+        needle = ref.lower()
+        matches = [
+            a for a in apps
+            if a["uuid"].startswith(ref) or needle in (a.get("name") or "").lower()
+        ]
+    if not matches:
+        sys.exit("No app matching %r" % ref)
+    if len(matches) > 1:
+        listing = "\n".join("  %s  %s" % (a["uuid"], a.get("name")) for a in matches)
+        sys.exit("%r matches several apps:\n%s" % (ref, listing))
+    return matches[0]["uuid"]
+
+
+def show_app(app):
+    print("%s  %-30s %-12s %s" % (
+        app["uuid"],
+        (app.get("name") or "?")[:30],
+        (app.get("version") or "?")[:12],
+        "signed" if app["signed"] else "unsigned",
+    ))
+
+
+# MARK: commands
+
+def cmd_login(args):
+    os.makedirs(os.path.dirname(CONFIG), exist_ok=True)
+    with open(CONFIG, "w") as f:
+        json.dump({"host": args.host.rstrip("/"), "token": args.token}, f)
+    os.chmod(CONFIG, 0o600)
+    print("Saved to %s" % CONFIG)
+
+
+def cmd_status(args):
+    status = call("GET", "/v1/status", timeout=30)
+    for key, value in status.items():
+        print("%-20s %s" % (key, value))
+
+
+def cmd_apps(args):
+    for app in call("GET", "/v1/apps", timeout=30)["apps"]:
+        show_app(app)
+
+
+def fetch(url):
+    """Pulls a remote ipa down here first, so the upload path stays the only one."""
+    name = os.path.basename(urllib.parse.urlparse(url).path) or "Download.ipa"
+    path = os.path.join(tempfile.gettempdir(), name)
+
+    try:
+        with urllib.request.urlopen(url, timeout=900) as response:
+            stream_to_file(response, path, "downloading")
+    except (urllib.error.URLError, OSError) as error:
+        sys.exit("Cannot download %s: %s" % (url, error))
+
+    return path
+
+
+def cmd_import(args):
+    source = args.file
+    downloaded = fetch(source) if source.startswith(("http://", "https://")) else None
+
+    try:
+        app = call("POST", "/v1/apps", upload=downloaded or source,
+                   query={"filename": os.path.basename(downloaded or source)})
+    finally:
+        if downloaded:
+            os.remove(downloaded)
+
+    show_app(app)
+
+    if args.sign or args.install:
+        args.app = app["uuid"]
+        cmd_sign(args)
+
+
+def cmd_sign(args):
+    body = {
+        "certificate": args.cert,
+        "name": args.name,
+        "identifier": args.bundle_id,
+        "version": args.version,
+        "install": bool(args.install),
+    }
+    body = {k: v for k, v in body.items() if v is not None}
+    uuid = resolve(args.app)
+
+    with waiting("signing"):
+        app = call("POST", "/v1/apps/%s/sign" % uuid, body=body)
+
+    show_app(app)
+
+    if args.install:
+        watch_install(app["uuid"])
+
+
+def watch_install(uuid, timeout=600):
+    """installd only reports once the payload is on its way, so wait for it to start first."""
+    started = False
+    deadline = time.time() + timeout
+
+    while time.time() < deadline:
+        share = call("GET", "/v1/apps/%s/progress" % uuid, timeout=30).get("progress") or 0.0
+
+        if share > 0:
+            started = True
+            bar("installing", share, 1.0)
+        elif started:
+            bar("installing", 1.0, 1.0)
+            done("installing")
+            return
+
+        time.sleep(0.5)
+
+    done("installing", "gave up waiting, check the device")
+
+
+def cmd_install(args):
+    uuid = resolve(args.app)
+    print(call("POST", "/v1/apps/%s/install" % uuid, timeout=60).get("message", "ok"))
+    watch_install(uuid)
+
+
+def cmd_export(args):
+    uuid = resolve(args.app)
+
+    with waiting("packaging"):
+        response = call("GET", "/v1/apps/%s/ipa" % uuid, raw=True)
+
+    out = args.output
+    if not out:
+        disposition = response.headers.get("Content-Disposition", "")
+        out = disposition.split('filename="')[-1].rstrip('"') or (uuid + ".ipa")
+
+    stream_to_file(response, out, "downloading")
+    print(out)
+
+
+def cmd_rm(args):
+    call("DELETE", "/v1/apps/%s" % resolve(args.app), timeout=60)
+    print("deleted")
+
+
+def cmd_certs(args):
+    result = call("GET", "/v1/certificates", timeout=30)
+    for cert in result["certificates"]:
+        print("%d%s %-30s %s%s" % (
+            cert["index"],
+            "*" if cert["index"] == result["selected"] else " ",
+            (cert.get("name") or "?")[:30],
+            (cert.get("expiration") or "?"),
+            "  REVOKED" if cert["revoked"] else "",
+        ))
+
+
+def cmd_cert_add(args):
+    def encoded(path):
+        with open(path, "rb") as f:
+            return base64.b64encode(f.read()).decode()
+
+    call("POST", "/v1/certificates", timeout=120, body={
+        "p12": encoded(args.p12),
+        "provision": encoded(args.provision),
+        "password": args.password,
+        "name": args.name or "",
+        "makeDefault": bool(args.default),
+    })
+    cmd_certs(args)
+
+
+def cmd_sources(args):
+    for source in call("GET", "/v1/sources", timeout=30)["sources"]:
+        print("%-30s %s" % ((source.get("name") or "?")[:30], source.get("url")))
+
+
+def cmd_source_add(args):
+    print(call("POST", "/v1/sources", body={"url": args.url}, timeout=60).get("message", "ok"))
+
+
+# MARK: parser
+
+def main():
+    parser = argparse.ArgumentParser(prog="feather", description=__doc__)
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    p = sub.add_parser("login", help="store host and token")
+    p.add_argument("host")
+    p.add_argument("token")
+    p.set_defaults(func=cmd_login)
+
+    sub.add_parser("status", help="device and app info").set_defaults(func=cmd_status)
+    sub.add_parser("apps", help="list apps").set_defaults(func=cmd_apps)
+
+    def signing_flags(parser):
+        parser.add_argument("--cert", type=int, help="certificate index, see `feather certs`")
+        parser.add_argument("--name")
+        parser.add_argument("--bundle-id")
+        parser.add_argument("--version")
+        parser.add_argument("--install", action="store_true", help="install right after signing")
+
+    p = sub.add_parser("import", help="send an ipa to the device, from a file or a url")
+    p.add_argument("file", metavar="ipa", help="path to an ipa, or an http(s) url to one")
+    p.add_argument("--sign", action="store_true", help="sign it once imported")
+    signing_flags(p)
+    p.set_defaults(func=cmd_import)
+
+    p = sub.add_parser("sign", help="sign an app")
+    p.add_argument("app", help="uuid, uuid prefix or part of the name")
+    signing_flags(p)
+    p.set_defaults(func=cmd_sign)
+
+    p = sub.add_parser("install", help="install an app on the device")
+    p.add_argument("app")
+    p.set_defaults(func=cmd_install)
+
+    p = sub.add_parser("export", help="package an app and download it")
+    p.add_argument("app")
+    p.add_argument("-o", "--output")
+    p.set_defaults(func=cmd_export)
+
+    p = sub.add_parser("rm", help="delete an app")
+    p.add_argument("app")
+    p.set_defaults(func=cmd_rm)
+
+    sub.add_parser("certs", help="list certificates").set_defaults(func=cmd_certs)
+
+    p = sub.add_parser("cert-add", help="import a p12 + mobileprovision")
+    p.add_argument("p12")
+    p.add_argument("provision")
+    p.add_argument("--password", default="")
+    p.add_argument("--name")
+    p.add_argument("--default", action="store_true")
+    p.set_defaults(func=cmd_cert_add)
+
+    sub.add_parser("sources", help="list sources").set_defaults(func=cmd_sources)
+
+    p = sub.add_parser("source-add", help="add an AltStore source")
+    p.add_argument("url")
+    p.set_defaults(func=cmd_source_add)
+
+    args = parser.parse_args()
+    args.func(args)
+
+
+if __name__ == "__main__":
+    main()

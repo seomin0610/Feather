@@ -261,8 +261,16 @@ struct LibraryView: View {
 					}
 				}
 			}
-			.onReceive(NotificationCenter.default.publisher(for: Notification.Name("Feather.installApp"))) { _ in
-				if let latest = _signedApps.first {
+			.onReceive(NotificationCenter.default.publisher(for: Notification.Name("Feather.installApp"))) { notification in
+				// the remote CLI names the app it wants, signing just asks for the one it made
+				if let uuid = notification.object as? String {
+					let app = _signedApps.first { $0.uuid == uuid }.map { $0 as AppInfoPresentable }
+						?? _importedApps.first { $0.uuid == uuid }.map { $0 as AppInfoPresentable }
+					
+					if let app {
+						_selectedInstallAppPresenting = AnyApp(base: app)
+					}
+				} else if let latest = _signedApps.first {
 					_selectedInstallAppPresenting = AnyApp(base: latest)
 				}
 			}

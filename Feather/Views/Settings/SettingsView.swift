@@ -76,6 +76,9 @@ struct SettingsView: View {
 					NavigationLink(destination: InstallationView()) {
 						Label(.localized("Installation"), systemImage: "arrow.down.circle")
 					}
+					NavigationLink(destination: RemoteView()) {
+						Label(.localized("Remote CLI"), systemImage: "terminal")
+					}
 				} footer: {
 					Text(.localized("Configure the apps way of installing, its zip compression levels, and custom modifications to apps."))
 				}

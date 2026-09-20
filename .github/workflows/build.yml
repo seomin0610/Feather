@@ -1,0 +1,39 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # catalyst gets its own run, most of the background task code is compiled out there
+        platform: [iphoneos, maccatalyst]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.3.0.app
+
+      - name: Compile Feather
+        run: make ${{ matrix.platform }}
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: Feather-${{ matrix.platform }}
+          path: packages/*
+          if-no-files-found: error

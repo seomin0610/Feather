@@ -234,7 +234,9 @@ extension SourceAppsTableRepresentableView { class Coordinator: NSObject, UITabl
 		}
 
 		cell.contentConfiguration = UIHostingConfiguration {
+			// a hosted cell starts its own SwiftUI hierarchy, the store's fetches need the context handed over
 			SourceAppsCellView(sourceURL: entry.sourceURL, source: entry.source, app: entry.app)
+				.environment(\.managedObjectContext, Storage.shared.context)
 		}
 		return cell
 	}

@@ -11,6 +11,7 @@ import CoreData
 import UIKit
 import OSLog
 import NimbleExtensions
+import IDeviceSwift
 
 // MARK: - Class
 /// Feather Remote Protocol: JSON over HTTP, bearer token auth, disabled unless turned on in Settings.
@@ -539,7 +540,7 @@ extension RemoteControlServer {
 			try? FileManager.default.removeItem(at: package.deletingLastPathComponent())
 		}
 
-		response.headers.contentDisposition = .init(.attachment, filename: filename)
+		response.headers.contentDisposition = HTTPHeaders.ContentDisposition(.attachment, filename: filename)
 		return response
 	}
 

@@ -144,15 +144,14 @@ class DownloadManager: NSObject, ObservableObject {
 	func cancelDownload(_ download: Download) {
 		download.task?.cancel()
 		
+		// outside the lookup below: a download already off the list can still own a running task
+		LiveTask.stop(download.id, success: false)
+		
 		if let index = downloads.firstIndex(where: { $0.id == download.id }) {
 			downloads.remove(at: index)
 			
 			#if !targetEnvironment(macCatalyst)
 			_updateBackgroundAudioState()
-
-			if #available(iOS 26.0, *) {
-				BackgroundTaskManager.shared.stopTask(for: download.id, success: false)
-			}
 			#endif
 		}
 	}

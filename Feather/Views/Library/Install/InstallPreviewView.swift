@@ -22,6 +22,7 @@ struct InstallPreviewView: View {
 	@State private var progressTask: Task<Void, Never>?
 	
 	var app: AppInfoPresentable
+	private var _taskId: String { "FeatherInstall_\(app.uuid ?? "")" }
 	@StateObject var viewModel: InstallerStatusViewModel
 	@StateObject var installer: ServerInstaller
 	
@@ -57,7 +58,20 @@ struct InstallPreviewView: View {
 		.sheet(isPresented: $_isWebviewPresenting) {
 			SafariRepresentableView(url: installer.pageEndpoint).ignoresSafeArea()
 		}
+		.onChange(of: viewModel.packageProgress) { progress in
+			// packaging takes the first half of the bar, installing the second
+			LiveTask.update(_taskId, progress: progress * 0.5, subtitle: .localized("Packaging"))
+		}
+		.onChange(of: viewModel.installProgress) { progress in
+			LiveTask.update(_taskId, progress: 0.5 + progress * 0.5, subtitle: .localized("Installing"))
+		}
 		.onReceive(viewModel.$status) { newStatus in
+			switch newStatus {
+			case .completed: LiveTask.update(_taskId, progress: 1.0, subtitle: .localized("Installing"))
+			case .broken: LiveTask.stop(_taskId, success: false)
+			default: break
+			}
+			
 			if _installationMethod == 0 {
 				if case .ready = newStatus {
 					if _serverMethod == 0 {
@@ -92,7 +106,10 @@ struct InstallPreviewView: View {
 				}
 			}
 		}
-		.onAppear(perform: _install)
+		.onAppear {
+			LiveTask.start(_taskId, title: app.name ?? Bundle.main.name, subtitle: .localized("Packaging"))
+			_install()
+		}
 		
 		#if !targetEnvironment(macCatalyst)
 		.onAppear {
@@ -101,6 +118,7 @@ struct InstallPreviewView: View {
 		#endif
 		
 		.onDisappear {
+			LiveTask.stop(_taskId, success: true)
 			progressTask?.cancel()
 			progressTask = nil
 			

@@ -6,3 +6,4 @@ xcuserdata/
 deps
 cert.json
 _build
+__pycache__/

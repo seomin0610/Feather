@@ -230,7 +230,7 @@ struct LibraryView: View {
 					.presentationDragIndicator(.visible)
 			}
 			.fullScreenCover(item: $_selectedSigningAppPresenting) { app in
-				SigningView(app: app.base, signAndInstall: app.signAndInstall)
+				SigningView(app: app.base, signAndInstall: app.signAndInstall, remoteSigning: app.remoteSigning)
 					.compatNavigationTransition(id: app.base.uuid ?? "", ns: _namespace)
 			}
 			.sheet(isPresented: $_isImportingPresenting) {
@@ -272,6 +272,16 @@ struct LibraryView: View {
 					}
 				} else if let latest = _signedApps.first {
 					_selectedInstallAppPresenting = AnyApp(base: latest)
+				}
+			}
+			.onReceive(NotificationCenter.default.publisher(for: Notification.Name("Feather.remoteSigning"))) { notification in
+				guard let uuid = notification.object as? String else { return }
+
+				let app = _importedApps.first { $0.uuid == uuid }.map { $0 as AppInfoPresentable }
+					?? _signedApps.first { $0.uuid == uuid }.map { $0 as AppInfoPresentable }
+
+				if let app {
+					_selectedSigningAppPresenting = AnyApp(base: app, remoteSigning: true)
 				}
 			}
 			.onReceive(NotificationCenter.default.publisher(for: Notification.Name("Feather.signUpdatedApp"))) { notification in

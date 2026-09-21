@@ -377,8 +377,16 @@ extension RemoteControlServer {
 		let filename = req.query[String.self, at: "filename"] ?? "Upload.ipa"
 		let ext = URL(fileURLWithPath: filename).pathExtension == "tipa" ? "tipa" : "ipa"
 
-		let file = FileManager.default.temporaryDirectory
-			.appendingPathComponent("FeatherRemote_\(UUID().uuidString).\(ext)")
+		// the client names this and the library bar shows it, so take the last component only
+		var name = URL(fileURLWithPath: filename).lastPathComponent
+		if name.isEmpty || name.hasPrefix(".") {
+			name = "Upload.\(ext)"
+		}
+
+		let directory = FileManager.default.temporaryDirectory
+			.appendingPathComponent("FeatherRemote_\(UUID().uuidString)", isDirectory: true)
+		try FileManager.default.createDirectoryIfNeeded(at: directory)
+		let file = directory.appendingPathComponent(name)
 
 		FileManager.default.createFile(atPath: file.path, contents: nil)
 		let handle = try FileHandle(forWritingTo: file)
@@ -390,21 +398,36 @@ extension RemoteControlServer {
 			try handle.close()
 		} catch {
 			try? handle.close()
-			try? FileManager.default.removeItem(at: file)
+			try? FileManager.default.removeItem(at: directory)
 			throw error
 		}
 
-		defer { try? FileManager.default.removeItem(at: file) }
+		defer { try? FileManager.default.removeItem(at: directory) }
 
-		try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-			FR.handlePackageFile(file) { error in
-				if let error {
-					continuation.resume(throwing: error)
-				} else {
-					continuation.resume()
+		// a manual download id is what puts it in the bar at the top of the library
+		let download = await MainActor.run {
+			DownloadManager.shared.startArchive(
+				from: file,
+				id: "FeatherManualDownload_Remote_\(UUID().uuidString)"
+			)
+		}
+
+		do {
+			try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+				FR.handlePackageFile(file, download: download) { error in
+					if let error {
+						continuation.resume(throwing: error)
+					} else {
+						continuation.resume()
+					}
 				}
 			}
+		} catch {
+			await MainActor.run { DownloadManager.shared.cancelDownload(download) }
+			throw error
 		}
+
+		await MainActor.run { DownloadManager.shared.cancelDownload(download) }
 
 		return try await MainActor.run {
 			guard let app = _newest(Imported.self) else {
@@ -458,14 +481,25 @@ extension RemoteControlServer {
 			throw Abort(.badRequest, reason: "No certificate, pass \"certificate\" or set one in Feather")
 		}
 
-		try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-			FR.signPackageFile(app, using: options, icon: nil, certificate: certificate) { error in
-				if let error {
-					continuation.resume(throwing: error)
-				} else {
-					continuation.resume()
+		// the library puts the signing screen up for this, and takes it down when the object is nil
+		await MainActor.run {
+			NotificationCenter.default.post(name: Notification.Name("Feather.remoteSigning"), object: uuid)
+		}
+
+		do {
+			try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+				FR.signPackageFile(app, using: options, icon: nil, certificate: certificate) { error in
+					if let error {
+						continuation.resume(throwing: error)
+					} else {
+						continuation.resume()
+					}
 				}
 			}
+			await _closeSigningScreen()
+		} catch {
+			await _closeSigningScreen()
+			throw error
 		}
 
 		let signed = try await MainActor.run { () -> AppModel in
@@ -485,6 +519,14 @@ extension RemoteControlServer {
 		}
 
 		return signed
+	}
+
+	private static func _closeSigningScreen() async {
+		await MainActor.run {
+			NotificationCenter.default.post(name: Notification.Name("Feather.remoteSigning"), object: nil)
+		}
+		// the install sheet can't come up while that screen is still on its way out
+		try? await Task.sleep(nanoseconds: 600_000_000)
 	}
 
 	/// Hands off to the librarys install sheet, which owns both the server and idevice paths.

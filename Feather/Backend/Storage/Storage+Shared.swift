@@ -91,6 +91,7 @@ struct AnyApp: Identifiable {
 	let base: AppInfoPresentable
 	var archive: Bool = false
 	var signAndInstall: Bool = false
+	var remoteSigning: Bool = false
 
 	var id: String {
 		base.uuid ?? UUID().uuidString

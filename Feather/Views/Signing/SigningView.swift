@@ -38,12 +38,17 @@ struct SigningView: View {
 	var app: AppInfoPresentable
 	/// Always installs after signing, regardless of the saved option.
 	var signAndInstall: Bool
+	/// The remote CLI is doing the signing, this is only here to show it happening.
+	var remoteSigning: Bool
 
-	init(app: AppInfoPresentable, signAndInstall: Bool = false) {
+	init(app: AppInfoPresentable, signAndInstall: Bool = false, remoteSigning: Bool = false) {
 		self.app = app
 		self.signAndInstall = signAndInstall
+		self.remoteSigning = remoteSigning
 		let storedCert = UserDefaults.standard.integer(forKey: "feather.selectedCert")
 		__temporaryCertificate = State(initialValue: storedCert)
+		// locks the form and the start button for work this screen isn't running
+		__isSigning = State(initialValue: remoteSigning)
 	}
 		
 	// MARK: Body
@@ -124,6 +129,11 @@ struct SigningView: View {
 			}
 			.disabled(_isSigning)
 			.animation(.smooth, value: _isSigning)
+		}
+		.onReceive(NotificationCenter.default.publisher(for: Notification.Name("Feather.remoteSigning"))) { notification in
+			if remoteSigning, notification.object == nil {
+				dismiss()
+			}
 		}
 		.onAppear {
 			// ppq protection

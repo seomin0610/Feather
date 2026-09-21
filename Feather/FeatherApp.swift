@@ -174,7 +174,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 		_createDocumentsDirectories()
 		ResetView.clearWorkCache()
 		_addDefaultCertificates()
-		RemoteControlServer.shared.applyStoredState()
+		RemoteControlServer.shared.resetOnLaunch()
 		return true
 	}
 	

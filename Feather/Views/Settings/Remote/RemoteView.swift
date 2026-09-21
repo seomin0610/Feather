@@ -15,6 +15,7 @@ struct RemoteView: View {
 
 	@AppStorage(RemoteControlServer.enabledKey) private var _enabled: Bool = false
 	@AppStorage(RemoteControlServer.portKey) private var _port: Int = RemoteControlServer.defaultPort
+	@AppStorage(RemoteControlServer.keepAliveKey) private var _keepAlive: Bool = true
 
 	// MARK: Body
 	var body: some View {
@@ -33,13 +34,15 @@ struct RemoteView: View {
 						.multilineTextAlignment(.trailing)
 				}
 
+				Toggle(.localized("Keep Running in Background"), systemImage: "moon.zzz", isOn: $_keepAlive)
+
 				if let error = _server.lastError {
 					Text(error)
 						.font(.footnote)
 						.foregroundStyle(.red)
 				}
 			} footer: {
-				Text(.localized("Lets a paired computer import, sign, install and export apps over HTTP. Feather has to stay open for it to answer."))
+				Text(.localized("Lets a paired computer import, sign, install and export apps over HTTP. Without the background option, Feather only answers while it is on screen. This always starts off when Feather launches."))
 			}
 
 			NBSection(.localized("Paired Computers")) {
@@ -72,6 +75,9 @@ struct RemoteView: View {
 		}
 		.onChange(of: _enabled) { _ in
 			_server.applyStoredState()
+		}
+		.onChange(of: _keepAlive) { _ in
+			_server.applyKeepAlive()
 		}
 		.onDisappear {
 			// port edits are applied on the way out, so typing one doesn't bounce the server per keystroke

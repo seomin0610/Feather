@@ -26,6 +26,7 @@ final class RemoteControlServer: ObservableObject {
 	static let enabledKey = "Feather.remote.enabled"
 	static let portKey = "Feather.remote.port"
 	static let pairedKey = "Feather.remote.paired"
+	static let keepAliveKey = "Feather.remote.keepAlive"
 	static let defaultPort = 8420
 
 	@Published private(set) var isRunning = false
@@ -42,6 +43,11 @@ final class RemoteControlServer: ObservableObject {
 	static var port: Int {
 		let stored = UserDefaults.standard.integer(forKey: portKey)
 		return stored > 0 ? stored : defaultPort
+	}
+
+	/// Silent audio keeps the app alive in the background, which is the only way the server keeps answering.
+	static var keepAlive: Bool {
+		UserDefaults.standard.object(forKey: keepAliveKey) as? Bool ?? true
 	}
 
 	/// Read straight from defaults: requests are answered off the main thread, the published copy is for the UI.
@@ -76,6 +82,11 @@ final class RemoteControlServer: ObservableObject {
 	}
 
 	// MARK: Lifecycle
+	/// Remote access is never on by itself after a launch, it has to be switched on deliberately.
+	func resetOnLaunch() {
+		UserDefaults.standard.set(false, forKey: Self.enabledKey)
+	}
+
 	/// Starts or stops the server to match the toggle in Settings.
 	func applyStoredState() {
 		if UserDefaults.standard.bool(forKey: Self.enabledKey) {
@@ -109,6 +120,7 @@ final class RemoteControlServer: ObservableObject {
 			_app = app
 			isRunning = true
 			lastError = nil
+			_startKeepAlive()
 			Logger.misc.info("Remote server listening on \(self.address)")
 		} catch {
 			lastError = String(describing: error)
@@ -117,11 +129,36 @@ final class RemoteControlServer: ObservableObject {
 		}
 	}
 
+	/// Called when the toggle moves, so it takes hold without restarting the server.
+	func applyKeepAlive() {
+		if isRunning, Self.keepAlive {
+			_startKeepAlive()
+		} else {
+			_stopKeepAlive()
+		}
+	}
+
+	private func _startKeepAlive() {
+		#if !targetEnvironment(macCatalyst)
+		guard Self.keepAlive else { return }
+		BackgroundAudioManager.shared.start()
+		#endif
+	}
+
+	private func _stopKeepAlive() {
+		#if !targetEnvironment(macCatalyst)
+		// below iOS 26 downloads lean on the same silent audio, don't pull it out from under them
+		if #unavailable(iOS 26.0), !DownloadManager.shared.downloads.isEmpty { return }
+		BackgroundAudioManager.shared.stop()
+		#endif
+	}
+
 	func stop() {
 		guard let app = _app else { return }
 
 		_app = nil
 		isRunning = false
+		_stopKeepAlive()
 
 		DispatchQueue.global(qos: .userInitiated).async {
 			app.server.shutdown()

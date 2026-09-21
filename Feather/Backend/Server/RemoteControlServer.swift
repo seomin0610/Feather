@@ -586,26 +586,43 @@ extension RemoteControlServer {
 		FileManager.default.createFile(atPath: file.path, contents: nil)
 		let handle = try FileHandle(forWritingTo: file)
 
+		// registered before a byte arrives, so the library bar covers the upload and not just the unpacking
+		let expected = req.headers.first(name: .contentLength).flatMap(Int64.init) ?? 0
+		let download = await MainActor.run { () -> Download in
+			let download = Download(id: "FeatherManualDownload_Remote_\(UUID().uuidString)", url: file)
+			download.totalBytes = expected
+			DownloadManager.shared.downloads.append(download)
+			return download
+		}
+
 		do {
+			var received: Int64 = 0
+			var reported: Int64 = 0
+
 			for try await chunk in req.body {
 				try handle.write(contentsOf: Data(chunk.readableBytesView))
+				received += Int64(chunk.readableBytes)
+
+				// the body arrives in small pieces, a hop to the main thread for each one is not worth it
+				if received - reported > 262_144 || received == expected {
+					reported = received
+					let sent = received
+					await MainActor.run {
+						download.bytesDownloaded = sent
+						download.progress = expected > 0 ? Double(sent) / Double(expected) : 0
+					}
+				}
 			}
+
 			try handle.close()
 		} catch {
 			try? handle.close()
 			try? FileManager.default.removeItem(at: directory)
+			await MainActor.run { DownloadManager.shared.cancelDownload(download) }
 			throw error
 		}
 
 		defer { try? FileManager.default.removeItem(at: directory) }
-
-		// a manual download id is what puts it in the bar at the top of the library
-		let download = await MainActor.run {
-			DownloadManager.shared.startArchive(
-				from: file,
-				id: "FeatherManualDownload_Remote_\(UUID().uuidString)"
-			)
-		}
 
 		do {
 			try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in

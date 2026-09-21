@@ -1,14 +1,21 @@
 #!/usr/bin/env python3
 """Feather remote CLI: drive a device running Feather from a computer.
 
-Config: FEATHER_HOST / FEATHER_TOKEN, or ~/.config/feather-cli.json (see `feather login`).
+Pair once with `feather login http://<device>:8420`, approve it on the phone, and the token
+lands in ~/.config/feather-cli.json. FEATHER_HOST / FEATHER_TOKEN override that file.
 """
 
 import argparse
 import base64
 import contextlib
+import getpass
+import hashlib
 import json
 import os
+import secrets
+import shutil
+import socket
+import subprocess
 import sys
 import tempfile
 import threading
@@ -104,29 +111,129 @@ def stream_to_file(response, path, label):
     done(label, "%.1f MB" % (read / 1048576))
 
 
-# MARK: transport
+# MARK: usb tunnel
 
-def config():
+def port_open(port):
+    try:
+        with socket.create_connection(("127.0.0.1", port), timeout=0.3):
+            return True
+    except OSError:
+        return False
+
+
+def attached():
+    """UDIDs of the devices on the cable, in the order usbmuxd lists them."""
+    if shutil.which("idevice_id") is None:
+        return []
+    try:
+        out = subprocess.run(["idevice_id", "-l"], capture_output=True, text=True, timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return []
+    return [line.strip() for line in out.stdout.splitlines() if line.strip()]
+
+
+def free_port(start):
+    for port in range(start, start + 50):
+        if not port_open(port):
+            return port
+    sys.exit("No free local port near %d" % start)
+
+
+def ensure_tunnel(local, remote, udid=None):
+    """usbmuxd forwards a local port to one on the device, iproxy is what opens it."""
+    if port_open(local):
+        return  # already up, from an earlier command or by hand
+
+    if shutil.which("iproxy") is None:
+        sys.exit("iproxy not found. Install libusbmuxd-utils (Fedora), "
+                 "libimobiledevice-utils (Debian) or libimobiledevice (brew).")
+
+    # pinned to one udid, so several devices can each have their own tunnel
+    command = ["iproxy"] + (["-u", udid] if udid else []) + ["%d:%d" % (local, remote)]
+
+    # outlives this command on purpose, every later one reuses it
+    subprocess.Popen(
+        command,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        start_new_session=True,
+    )
+
+    for _ in range(30):
+        if port_open(local):
+            return
+        time.sleep(0.1)
+
+    sys.exit("iproxy did not come up on port %d, is the device plugged in and trusted?" % local)
+
+
+# MARK: config
+
+SELECTED = None  # set from --device before any command runs
+
+
+def load():
     try:
         with open(CONFIG) as f:
             stored = json.load(f)
     except (OSError, ValueError):
-        stored = {}
+        return {"devices": {}, "current": None}
 
-    host = os.environ.get("FEATHER_HOST") or stored.get("host")
-    token = os.environ.get("FEATHER_TOKEN") or stored.get("token")
+    # a config from before multi-device held one device inline
+    if "host" in stored:
+        name = stored.get("name", "device")
+        stored = {"devices": {name: stored}, "current": name}
+
+    stored.setdefault("devices", {})
+    stored.setdefault("current", None)
+    return stored
+
+
+def save(stored):
+    os.makedirs(os.path.dirname(CONFIG), exist_ok=True)
+    with open(CONFIG, "w") as f:
+        json.dump(stored, f, indent=1)
+    os.chmod(CONFIG, 0o600)
+
+
+def device():
+    """The device this command talks to: --device, else the current one."""
+    stored = load()
+    devices = stored["devices"]
+    name = SELECTED or stored["current"]
+
+    if SELECTED and SELECTED not in devices:
+        sys.exit("No device named %r. Paired: %s"
+                 % (SELECTED, ", ".join(sorted(devices)) or "none"))
+
+    return devices.get(name, {}), name
+
+
+# MARK: transport
+
+def config():
+    entry, _ = device()
+
+    host = os.environ.get("FEATHER_HOST") or entry.get("host")
+    token = os.environ.get("FEATHER_TOKEN") or entry.get("token")
     if not host or not token:
-        sys.exit("No host/token. Run: feather login http://<device-ip>:8420 <token>")
+        sys.exit("Not paired. Run: feather login --usb (or: feather login http://<device-ip>:8420)")
+
+    if entry.get("usb") and not os.environ.get("FEATHER_HOST"):
+        ensure_tunnel(entry.get("localPort", 8420), entry.get("port", 8420), entry.get("udid"))
+
     return host.rstrip("/"), token
 
 
-def call(method, path, body=None, upload=None, query=None, timeout=900, raw=False):
-    host, token = config()
+def call(method, path, body=None, upload=None, query=None, timeout=900, raw=False,
+         host=None, token=None):
+    if host is None:
+        host, token = config()
     url = host + path
     if query:
         url += "?" + urllib.parse.urlencode(query)
 
-    headers = {"Authorization": "Bearer " + token}
+    headers = {"Authorization": "Bearer " + token} if token else {}
     data = None
 
     if body is not None:
@@ -188,15 +295,124 @@ def show_app(app):
 
 # MARK: commands
 
+def save_login(name, entry):
+    stored = load()
+    stored["devices"][name] = entry
+    stored["current"] = name
+    save(stored)
+    print("Saved %r to %s" % (name, CONFIG))
+
+    # they win over the file, so a stale one silently sends every command somewhere else
+    stale = [key for key in ("FEATHER_HOST", "FEATHER_TOKEN") if os.environ.get(key)]
+    if stale:
+        print("Warning: %s set in this shell and override what was just saved."
+              % " and ".join(stale), file=sys.stderr)
+
+
+def pick_udid(args):
+    """With one device on the cable there is nothing to ask, with several there is."""
+    if args.udid:
+        return args.udid
+
+    devices = attached()
+    if len(devices) > 1:
+        sys.exit("Several devices are attached, pick one with --udid:\n  %s"
+                 % "\n  ".join(devices))
+
+    return devices[0] if devices else None
+
+
+def unique(name, devices):
+    if name not in devices:
+        return name
+    for suffix in range(2, 100):
+        candidate = "%s %d" % (name, suffix)
+        if candidate not in devices:
+            return candidate
+    return name
+
+
 def cmd_login(args):
-    os.makedirs(os.path.dirname(CONFIG), exist_ok=True)
-    with open(CONFIG, "w") as f:
-        json.dump({"host": args.host.rstrip("/"), "token": args.token}, f)
-    os.chmod(CONFIG, 0o600)
-    print("Saved to %s" % CONFIG)
+    entry = {}
+
+    if args.usb:
+        udid = pick_udid(args)
+        local = free_port(args.port)
+        ensure_tunnel(local, args.port, udid)
+        host = "http://127.0.0.1:%d" % local
+        entry.update(usb=True, port=args.port, localPort=local, udid=udid)
+    elif args.host:
+        host = args.host.rstrip("/")
+    else:
+        sys.exit("Give the device's address, or --usb to tunnel over the cable")
+
+    entry["host"] = host
+
+    if args.token:
+        entry["token"] = args.token
+        save_login(args.name or host, entry)
+        return
+
+    code = "%06d" % secrets.randbelow(1000000)
+    who = "%s@%s" % (getpass.getuser(), socket.gethostname())
+
+    print("Pairing code: %s" % code)
+    print("Allow the request on the device, then type that code there.")
+
+    with waiting("pairing"):
+        result = call("POST", "/v1/pair", host=host, timeout=180, body={
+            "name": who,
+            # the device compares hashes, the code itself never goes over the wire
+            "codeHash": hashlib.sha256(code.encode()).hexdigest(),
+        })
+
+    entry["token"] = result["token"]
+    name = args.name or unique(result.get("device", "device"), load()["devices"])
+
+    print("Paired with %s" % name)
+    save_login(name, entry)
+
+
+def cmd_devices(args):
+    stored = load()
+    if not stored["devices"]:
+        sys.exit("Nothing paired. Run: feather login --usb")
+
+    for name, entry in sorted(stored["devices"].items()):
+        print("%s %-24s %s%s" % (
+            "*" if name == stored["current"] else " ",
+            name,
+            entry.get("host"),
+            "  (usb)" if entry.get("usb") else "",
+        ))
+
+
+def cmd_use(args):
+    stored = load()
+    if args.name not in stored["devices"]:
+        sys.exit("No device named %r. Paired: %s"
+                 % (args.name, ", ".join(sorted(stored["devices"]))))
+
+    stored["current"] = args.name
+    save(stored)
+    print("Now using %s" % args.name)
+
+
+def cmd_forget(args):
+    stored = load()
+    if stored["devices"].pop(args.name, None) is None:
+        sys.exit("No device named %r" % args.name)
+
+    if stored["current"] == args.name:
+        stored["current"] = next(iter(sorted(stored["devices"])), None)
+
+    save(stored)
+    print("Forgot %s (revoke it on the device too, under Paired Computers)" % args.name)
 
 
 def cmd_status(args):
+    host, _ = config()
+    print("%-20s %s" % ("host", host))
     status = call("GET", "/v1/status", timeout=30)
     for key, value in status.items():
         print("%-20s %s" % (key, value))
@@ -346,12 +562,27 @@ def cmd_source_add(args):
 
 def main():
     parser = argparse.ArgumentParser(prog="feather", description=__doc__)
+    parser.add_argument("-d", "--device", help="which paired device to talk to (default: see `feather devices`)")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    p = sub.add_parser("login", help="store host and token")
-    p.add_argument("host")
-    p.add_argument("token")
+    p = sub.add_parser("login", help="pair with a device and store its token")
+    p.add_argument("host", nargs="?", help="e.g. http://192.168.1.5:8420, or leave it out with --usb")
+    p.add_argument("token", nargs="?", help="skip pairing and use a token you already have")
+    p.add_argument("--usb", action="store_true", help="reach the device over the cable, starting iproxy as needed")
+    p.add_argument("--udid", help="which attached device, when more than one is plugged in")
+    p.add_argument("--port", type=int, default=8420, help="the port Remote CLI listens on (default 8420)")
+    p.add_argument("--name", help="what to call it here (default: the device's own name)")
     p.set_defaults(func=cmd_login)
+
+    sub.add_parser("devices", help="list paired devices").set_defaults(func=cmd_devices)
+
+    p = sub.add_parser("use", help="make a paired device the default")
+    p.add_argument("name")
+    p.set_defaults(func=cmd_use)
+
+    p = sub.add_parser("forget", help="drop a paired device from this computer")
+    p.add_argument("name")
+    p.set_defaults(func=cmd_forget)
 
     sub.add_parser("status", help="device and app info").set_defaults(func=cmd_status)
     sub.add_parser("apps", help="list apps").set_defaults(func=cmd_apps)
@@ -404,6 +635,10 @@ def main():
     p.set_defaults(func=cmd_source_add)
 
     args = parser.parse_args()
+
+    global SELECTED
+    SELECTED = args.device
+
     args.func(args)
 
 

@@ -4,29 +4,42 @@ Drive Feather on the device from a computer: import, sign, install, export, cert
 
 ## Turn it on
 
-Feather → Settings → Features → **Remote CLI** → enable. The screen shows the address, the token,
-and a *Copy Connection Command* button that puts this on the clipboard:
-
-```sh
-export FEATHER_HOST=http://192.168.1.42:8420
-export FEATHER_TOKEN=<token>
-```
+Feather → Settings → Features → **Remote CLI** → enable. The screen shows the address to reach it at,
+and the computers that are currently paired.
 
 Feather has to stay open on the device — iOS suspends the server when the app goes to the background.
 
-## Connect
+## Pair
 
-Wi-Fi: use the address shown in Settings.
-
-USB (works without a shared network, needs `libimobiledevice`):
+Over USB (no shared network needed, wants `iproxy` from `libusbmuxd-utils`):
 
 ```sh
-iproxy 8420 8420 &
-feather login http://127.0.0.1:8420 <token>
+feather login --usb
 ```
 
-`feather login` stores the host and token in `~/.config/feather-cli.json`; `FEATHER_HOST` /
-`FEATHER_TOKEN` override it.
+That starts the tunnel itself and leaves it running, and every later command brings it back up if it
+died. Over Wi-Fi, pass the address shown in Settings instead:
+
+```sh
+feather login http://192.168.1.5:8420
+```
+
+Either way the computer prints a code and waits:
+
+```
+Pairing code: 481920
+Allow the request on the device, then type that code there.
+```
+
+The device asks whether to allow that computer, naming it and its address, and then asks for the
+code. Type the printed one. Only then does the device hand out a token, which lands in
+`~/.config/feather-cli.json` (mode 600). The code is hashed before it is sent, so it never travels
+over the wire.
+
+Swiping a row away under **Paired Computers** cuts that computer off immediately.
+
+`FEATHER_HOST` / `FEATHER_TOKEN` override the stored file, which is handy for scripts and a good way
+to confuse yourself otherwise — `feather status` prints the host it is using.
 
 ## Use
 
@@ -56,11 +69,16 @@ set in Settings (server or idevice) and needs Feather to be in the foreground.
 
 ## Protocol
 
-JSON over HTTP, one bearer token, everything under `/v1`. Errors come back as
+JSON over HTTP, everything under `/v1`. Every route needs `Authorization: Bearer <token>` except
+`/v1/pair`, which is how a computer gets one. Errors come back as
 `{"error": true, "reason": "..."}` with a normal HTTP status.
+
+`/v1/pair` holds the request open until the person with the device allows it and types the code
+(2 minute limit), so expect it to sit there. One pairing can be in flight at a time.
 
 | Method | Path | Body | Returns |
 |---|---|---|---|
+| POST | `/v1/pair` | `{name, codeHash}` | `{token, device}` once allowed on the device |
 | GET | `/v1/status` | | app, device, installation method, protocol version |
 | GET | `/v1/apps` | | `{apps: [...]}` |
 | POST | `/v1/apps?filename=x.ipa` | raw ipa bytes | the imported app |
@@ -80,5 +98,5 @@ So `curl` works too:
 curl -H "Authorization: Bearer $FEATHER_TOKEN" $FEATHER_HOST/v1/apps
 ```
 
-The token is the only thing standing between your certificates and the rest of the network. Keep the
-toggle off when you are not using it, and regenerate the token if it leaks.
+A paired token is all a computer needs to use your certificates, so keep the toggle off when you are
+not using it, and unpair anything you do not recognise.

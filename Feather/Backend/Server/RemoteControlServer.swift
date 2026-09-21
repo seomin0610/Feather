@@ -10,6 +10,7 @@ import Vapor
 import CoreData
 import UIKit
 import OSLog
+import CryptoKit
 import NimbleExtensions
 import IDeviceSwift
 
@@ -24,13 +25,16 @@ final class RemoteControlServer: ObservableObject {
 	static let version = 1
 	static let enabledKey = "Feather.remote.enabled"
 	static let portKey = "Feather.remote.port"
-	static let tokenKey = "Feather.remote.token"
+	static let pairedKey = "Feather.remote.paired"
 	static let defaultPort = 8420
 
 	@Published private(set) var isRunning = false
 	@Published private(set) var lastError: String?
+	@Published private(set) var paired: [PairedComputer] = RemoteControlServer.storedPairs()
 
 	private var _app: Application?
+	private var _pendingPair: CheckedContinuation<String, Error>?
+	private var _pendingAlert: UIAlertController?
 
 	private init() {}
 
@@ -40,30 +44,31 @@ final class RemoteControlServer: ObservableObject {
 		return stored > 0 ? stored : defaultPort
 	}
 
-	static var token: String {
-		if
-			let existing = UserDefaults.standard.string(forKey: tokenKey),
-			!existing.isEmpty
-		{
-			return existing
-		}
-
-		return regenerateToken()
+	/// Read straight from defaults: requests are answered off the main thread, the published copy is for the UI.
+	static func storedPairs() -> [PairedComputer] {
+		guard let data = UserDefaults.standard.data(forKey: pairedKey) else { return [] }
+		return (try? JSONDecoder().decode([PairedComputer].self, from: data)) ?? []
 	}
 
-	@discardableResult
-	static func regenerateToken() -> String {
+	private static func _store(_ pairs: [PairedComputer]) {
+		UserDefaults.standard.set(try? JSONEncoder().encode(pairs), forKey: pairedKey)
+	}
+
+	private static func _newToken() -> String {
 		var bytes = [UInt8](repeating: 0, count: 24)
 		_ = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
 
-		let token = Data(bytes)
+		return Data(bytes)
 			.base64EncodedString()
 			.replacingOccurrences(of: "+", with: "-")
 			.replacingOccurrences(of: "/", with: "_")
 			.replacingOccurrences(of: "=", with: "")
+	}
 
-		UserDefaults.standard.set(token, forKey: tokenKey)
-		return token
+	@MainActor
+	func unpair(_ computer: PairedComputer) {
+		paired.removeAll { $0.id == computer.id }
+		Self._store(paired)
 	}
 
 	var address: String {
@@ -96,7 +101,7 @@ final class RemoteControlServer: ObservableObject {
 			app.http.server.configuration.port = Self.port
 			app.http.server.configuration.tcpNoDelay = true
 			app.routes.defaultMaxBodySize = "16mb"
-			app.middleware.use(TokenMiddleware(token: Self.token))
+			app.middleware.use(TokenMiddleware())
 
 			_routes(app)
 
@@ -128,14 +133,17 @@ final class RemoteControlServer: ObservableObject {
 // MARK: - Class extension: Auth
 extension RemoteControlServer {
 	struct TokenMiddleware: AsyncMiddleware {
-		let token: String
-
 		func respond(to request: Request, chainingTo next: AsyncResponder) async throws -> Response {
+			// pairing is how a computer gets a token, so it can't need one
+			if request.url.path == "/v1/pair" {
+				return try await next.respond(to: request)
+			}
+
 			guard
 				let given = request.headers.bearerAuthorization?.token,
-				Self.matches(given, token)
+				RemoteControlServer.storedPairs().contains(where: { Self.matches(given, $0.token) })
 			else {
-				throw Abort(.unauthorized, reason: "Missing or wrong bearer token")
+				throw Abort(.unauthorized, reason: "Not paired with this device, run: feather login")
 			}
 
 			return try await next.respond(to: request)
@@ -221,6 +229,25 @@ extension RemoteControlServer {
 		var url: String
 	}
 
+	struct PairedComputer: Content, Identifiable {
+		let id: String
+		let name: String
+		let address: String
+		let token: String
+		let date: Date
+	}
+
+	struct PairRequestModel: Content {
+		var name: String
+		/// SHA-256 of the code shown on the computer, so it never travels in the clear.
+		var codeHash: String
+	}
+
+	struct PairResponseModel: Content {
+		let token: String
+		let device: String
+	}
+
 	struct ProgressModel: Content {
 		let identifier: String?
 		let progress: Double?
@@ -235,6 +262,10 @@ extension RemoteControlServer {
 // MARK: - Class extension: Routes
 extension RemoteControlServer {
 	private func _routes(_ app: Application) {
+		app.post("v1", "pair") { req async throws -> PairResponseModel in
+			try await Self._pair(req)
+		}
+
 		app.get("v1", "status") { _ async throws -> StatusModel in
 			try await Self._status()
 		}
@@ -340,6 +371,133 @@ extension RemoteControlServer {
 		request.sortDescriptors = [NSSortDescriptor(key: "date", ascending: false)]
 		request.fetchLimit = 1
 		return try? Storage.shared.context.fetch(request).first
+	}
+
+	/// Waits on the person holding the device: allow, then type the code the computer printed.
+	private static func _pair(_ req: Request) async throws -> PairResponseModel {
+		let body = try req.content.decode(PairRequestModel.self)
+		let name = String(body.name.prefix(60))
+		let address = req.remoteAddress?.ipAddress ?? "unknown"
+
+		let token = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<String, Error>) in
+			Task { @MainActor in
+				shared._askToPair(
+					name: name,
+					address: address,
+					codeHash: body.codeHash.lowercased(),
+					continuation: continuation
+				)
+			}
+		}
+
+		return PairResponseModel(token: token, device: UIDevice.current.name)
+	}
+
+	@MainActor
+	private func _askToPair(
+		name: String,
+		address: String,
+		codeHash: String,
+		continuation: CheckedContinuation<String, Error>
+	) {
+		guard _pendingPair == nil else {
+			continuation.resume(throwing: Abort(.tooManyRequests, reason: "Another computer is already waiting to pair"))
+			return
+		}
+
+		guard let presenter = UIApplication.topViewController() else {
+			continuation.resume(throwing: Abort(.conflict, reason: "Feather must be open on the device to pair"))
+			return
+		}
+
+		_pendingPair = continuation
+
+		let request = UIAlertController(
+			title: .localized("Pairing Request"),
+			message: "\(name)\n\(address)\n\n" + .localized("Allow this computer to sign and install apps?"),
+			preferredStyle: .alert
+		)
+
+		request.addAction(UIAlertAction(title: .localized("Deny"), style: .cancel) { [weak self] _ in
+			self?._finishPair(.failure(Abort(.forbidden, reason: "Denied on the device")))
+		})
+
+		request.addAction(UIAlertAction(title: .localized("Allow"), style: .default) { [weak self] _ in
+			self?._askForCode(name: name, address: address, codeHash: codeHash)
+		})
+
+		_pendingAlert = request
+		presenter.present(request, animated: true)
+
+		// nobody is going to answer an alert from yesterday
+		DispatchQueue.main.asyncAfter(deadline: .now() + 120) { [weak self] in
+			self?._finishPair(.failure(Abort(.requestTimeout, reason: "Pairing timed out")))
+		}
+	}
+
+	@MainActor
+	private func _askForCode(name: String, address: String, codeHash: String) {
+		guard let presenter = UIApplication.topViewController() else {
+			_finishPair(.failure(Abort(.conflict, reason: "Feather must be open on the device to pair")))
+			return
+		}
+
+		let entry = UIAlertController(
+			title: .localized("Pairing Code"),
+			message: .localized("Enter the code shown on the computer."),
+			preferredStyle: .alert
+		)
+
+		entry.addTextField {
+			$0.keyboardType = .numberPad
+			$0.placeholder = "000000"
+			$0.textAlignment = .center
+		}
+
+		entry.addAction(UIAlertAction(title: .localized("Cancel"), style: .cancel) { [weak self] _ in
+			self?._finishPair(.failure(Abort(.forbidden, reason: "Cancelled on the device")))
+		})
+
+		entry.addAction(UIAlertAction(title: .localized("Pair"), style: .default) { [weak self, weak entry] _ in
+			guard let self else { return }
+
+			let typed = entry?.textFields?.first?.text ?? ""
+			let hash = SHA256.hash(data: Data(typed.utf8)).map { String(format: "%02x", $0) }.joined()
+
+			guard TokenMiddleware.matches(hash, codeHash) else {
+				self._finishPair(.failure(Abort(.forbidden, reason: "Wrong pairing code")))
+				UIAlertController.showAlertWithOk(
+					title: .localized("Pairing Code"),
+					message: .localized("The code did not match, nothing was paired.")
+				)
+				return
+			}
+
+			let computer = PairedComputer(
+				id: UUID().uuidString,
+				name: name,
+				address: address,
+				token: Self._newToken(),
+				date: Date()
+			)
+
+			self.paired.append(computer)
+			Self._store(self.paired)
+			self._finishPair(.success(computer.token))
+		})
+
+		_pendingAlert = entry
+		presenter.present(entry, animated: true)
+	}
+
+	@MainActor
+	private func _finishPair(_ result: Result<String, Error>) {
+		guard let continuation = _pendingPair else { return }
+
+		_pendingPair = nil
+		_pendingAlert?.dismiss(animated: true)
+		_pendingAlert = nil
+		continuation.resume(with: result)
 	}
 
 	private static func _status() async throws -> StatusModel {

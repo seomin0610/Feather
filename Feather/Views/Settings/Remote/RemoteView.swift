@@ -16,9 +16,6 @@ struct RemoteView: View {
 	@AppStorage(RemoteControlServer.enabledKey) private var _enabled: Bool = false
 	@AppStorage(RemoteControlServer.portKey) private var _port: Int = RemoteControlServer.defaultPort
 
-	@State private var _token: String = RemoteControlServer.token
-	@State private var _isTokenVisible = false
-
 	// MARK: Body
 	var body: some View {
 		NBList(.localized("Remote CLI")) {
@@ -42,31 +39,35 @@ struct RemoteView: View {
 						.foregroundStyle(.red)
 				}
 			} footer: {
-				Text(.localized("Lets a computer import, sign, install and export apps over HTTP. Feather has to stay open for it to answer."))
+				Text(.localized("Lets a paired computer import, sign, install and export apps over HTTP. Feather has to stay open for it to answer."))
 			}
 
-			NBSection(.localized("Token")) {
-				Button {
-					_isTokenVisible.toggle()
-				} label: {
-					Text(verbatim: _isTokenVisible ? _token : String(repeating: "•", count: 16))
-						.font(.system(.footnote, design: .monospaced))
-						.foregroundStyle(.primary)
+			NBSection(.localized("Paired Computers")) {
+				if _server.paired.isEmpty {
+					Text(.localized("Nothing paired yet."))
+						.font(.footnote)
+						.foregroundColor(.disabled())
+				} else {
+					ForEach(_server.paired) { computer in
+						VStack(alignment: .leading, spacing: 2) {
+							Text(computer.name)
+							Text(verbatim: "\(computer.address) · \(computer.date.formatted(date: .abbreviated, time: .shortened))")
+								.font(.footnote)
+								.foregroundStyle(.secondary)
+						}
+					}
+					.onDelete { offsets in
+						for computer in offsets.map({ _server.paired[$0] }) {
+							_server.unpair(computer)
+						}
+					}
 				}
 
-				Button(.localized("Copy Connection Command"), systemImage: "doc.on.doc") {
-					UIPasteboard.general.string = """
-					export FEATHER_HOST=\(_server.isRunning ? _server.address : "http://127.0.0.1:\(_port)")
-					export FEATHER_TOKEN=\(_token)
-					"""
-				}
-
-				Button(.localized("Regenerate Token"), systemImage: "arrow.clockwise") {
-					_token = RemoteControlServer.regenerateToken()
-					if _enabled { _server.restart() }
+				Button(.localized("Copy Pairing Command"), systemImage: "doc.on.doc") {
+					UIPasteboard.general.string = "feather login \(_server.isRunning ? _server.address : "http://127.0.0.1:\(_port)")"
 				}
 			} footer: {
-				Text(verbatim: .localized("Every request needs this token. Over USB, forward the port with iproxy %@ %@ and connect to http://127.0.0.1:%@", arguments: "\(_port)", "\(_port)", "\(_port)"))
+				Text(.localized("Run the pairing command on the computer. This device asks before anything is paired, and swiping a row away cuts that computer off."))
 			}
 		}
 		.onChange(of: _enabled) { _ in

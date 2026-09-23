@@ -202,10 +202,6 @@ extension SigningView {
 					bindingValue: $_temporaryOptions.appVersion
 				)
 			}
-			LabeledContent(.localized("Minimum OS")) {
-				Text(_minimumOSVersion ?? .localized("Unknown"))
-					.foregroundStyle(_minimumOSVersion == nil ? .secondary : .primary)
-			}
 		}
 	}
 	

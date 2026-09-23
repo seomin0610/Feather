@@ -40,7 +40,7 @@ Visit [releases](https://github.com/seomin0610/Feather/releases) and get the lat
 
 ## Translating
 
-Impactor now has translation support, all localizations are located in `Feather/Resources/Localizable.xcstrings`.
+Feather now has translation support, all localizations are located in `Feather/Resources/Localizable.xcstrings`.
 
 To add a new language, open Xcode and use the interface to add/contribute to languages.
 

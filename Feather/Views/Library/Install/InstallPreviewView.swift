@@ -100,7 +100,7 @@ struct InstallPreviewView: View {
 					progressTask = nil
 					installer.clean()
 					#if !targetEnvironment(macCatalyst)
-					BackgroundAudioManager.shared.stop()
+					BackgroundAudioManager.shared.stop("install")
 					#endif
 				default:
 					break
@@ -114,7 +114,7 @@ struct InstallPreviewView: View {
 		
 		#if !targetEnvironment(macCatalyst)
 		.onAppear {
-			BackgroundAudioManager.shared.start()
+			BackgroundAudioManager.shared.start("install")
 		}
 		#endif
 		
@@ -124,7 +124,7 @@ struct InstallPreviewView: View {
 			progressTask = nil
 			
 			#if !targetEnvironment(macCatalyst)
-			BackgroundAudioManager.shared.stop()
+			BackgroundAudioManager.shared.stop("install")
 			#endif
 		}
 	}

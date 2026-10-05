@@ -61,9 +61,9 @@ class DownloadManager: NSObject, ObservableObject {
 	private func _updateBackgroundAudioState() {
 		if #unavailable(iOS 26.0){
 			if !downloads.isEmpty {
-				BackgroundAudioManager.shared.start()
+				BackgroundAudioManager.shared.start("download")
 			} else  {
-				BackgroundAudioManager.shared.stop()
+				BackgroundAudioManager.shared.stop("download")
 			}
 		}
 	}

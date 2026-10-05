@@ -141,15 +141,13 @@ final class RemoteControlServer: ObservableObject {
 	private func _startKeepAlive() {
 		#if !targetEnvironment(macCatalyst)
 		guard Self.keepAlive else { return }
-		BackgroundAudioManager.shared.start()
+		BackgroundAudioManager.shared.start("remote")
 		#endif
 	}
 
 	private func _stopKeepAlive() {
 		#if !targetEnvironment(macCatalyst)
-		// below iOS 26 downloads lean on the same silent audio, don't pull it out from under them
-		if #unavailable(iOS 26.0), !DownloadManager.shared.downloads.isEmpty { return }
-		BackgroundAudioManager.shared.stop()
+		BackgroundAudioManager.shared.stop("remote")
 		#endif
 	}
 

@@ -38,6 +38,25 @@ assert cli.resolve("cccc-3333") == "cccc-3333"      # nameless app
 assert fails("delta")                               # ambiguous
 assert fails("nope")                                # no match
 
+# MARK: replace
+
+LIBRARY = [
+    {"uuid": "new", "identifier": "com.x", "signed": False},
+    {"uuid": "old", "identifier": "com.x", "signed": False, "version": "1"},
+    {"uuid": "old-signed", "identifier": "com.x", "signed": True},
+    {"uuid": "other", "identifier": "com.y", "signed": False},
+    {"uuid": "bare", "signed": False},
+]
+DELETED = []
+cli.call = lambda method, path, **kwargs: DELETED.append(path) if method == "DELETE" else {"apps": LIBRARY}
+
+cli.replace_older(LIBRARY[0])
+assert DELETED == ["/v1/apps/old"]                  # same id and kind only, never itself
+
+DELETED.clear()
+cli.replace_older(LIBRARY[4])
+assert DELETED == []                                # no bundle id, nothing to match on
+
 # MARK: pairing
 
 cli.call = REAL_CALL

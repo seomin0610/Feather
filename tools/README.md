@@ -48,6 +48,7 @@ feather status
 feather apps
 feather import MyApp.ipa --sign --install     # one shot: upload, sign, install
 feather import https://host/MyApp.ipa --sign --install   # a url works too, fetched here then uploaded
+feather import MyApp.ipa --replace --sign --install      # and drop the older copies of that bundle id
 feather sign MyApp --cert 0 --bundle-id com.me.app
 feather install MyApp
 feather export MyApp -o signed.ipa
@@ -59,6 +60,10 @@ feather source-add https://example.com/repo.json
 ```
 
 An app is named by uuid, uuid prefix, or part of its name.
+
+`--replace` (on `import` and `sign`) deletes the other library entries with the new app's bundle id,
+of the same kind: imported ones after the import, signed ones after signing. It works whatever
+"Replace Apps on Update" is set to on the device.
 
 Transfers show a bar, signing and packaging show elapsed time (the device reports no percentage for
 those), and installs show installd's own progress, polled from `/v1/apps/{uuid}/progress`. All of it

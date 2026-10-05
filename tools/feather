@@ -438,6 +438,19 @@ def fetch(url):
     return path
 
 
+def replace_older(app):
+    """Drops the other copies of this bundle id, of the same kind, like Replace Apps on Update."""
+    for old in call("GET", "/v1/apps", timeout=30)["apps"]:
+        if (
+            old["uuid"] != app["uuid"]
+            and old["signed"] == app["signed"]
+            and app.get("identifier")
+            and old.get("identifier") == app["identifier"]
+        ):
+            call("DELETE", "/v1/apps/%s" % old["uuid"], timeout=60)
+            print("replaced %s %s" % (old["uuid"], old.get("version") or "?"))
+
+
 def cmd_import(args):
     source = args.file
     downloaded = fetch(source) if source.startswith(("http://", "https://")) else None
@@ -450,6 +463,9 @@ def cmd_import(args):
             os.remove(downloaded)
 
     show_app(app)
+
+    if args.replace:
+        replace_older(app)
 
     if args.sign or args.install:
         args.app = app["uuid"]
@@ -471,6 +487,9 @@ def cmd_sign(args):
         app = call("POST", "/v1/apps/%s/sign" % uuid, body=body)
 
     show_app(app)
+
+    if args.replace:
+        replace_older(app)
 
     if args.install:
         watch_install(app["uuid"])
@@ -594,6 +613,8 @@ def main():
         parser.add_argument("--bundle-id")
         parser.add_argument("--version")
         parser.add_argument("--install", action="store_true", help="install right after signing")
+        parser.add_argument("--replace", action="store_true",
+                            help="delete older copies with the same bundle id (signed ones only when signing)")
 
     p = sub.add_parser("import", help="send an ipa to the device, from a file or a url")
     p.add_argument("file", metavar="ipa", help="path to an ipa, or an http(s) url to one")

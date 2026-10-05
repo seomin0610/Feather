@@ -16,11 +16,13 @@ struct ExpandableText: View {
 	@State private var truncated: Bool = false
 
 	var body: some View {
+		let markdown = Self._markdown(text)
+
 		VStack(alignment: .leading, spacing: 4) {
-			Text(text)
+			Text(markdown)
 				.lineLimit(expanded ? nil : lineLimit)
 				.background(
-					Text(text)
+					Text(markdown)
 						.lineLimit(lineLimit)
 						.background(GeometryReader { proxy in
 							Color.clear
@@ -32,11 +34,14 @@ struct ExpandableText: View {
 						})
 						.hidden()
 				)
-				.onTapGesture {pGesture in
-					withAnimation {
-						expanded.toggle()
-					}
-				}
+				.gesture(
+					TapGesture().onEnded {
+						withAnimation {
+							expanded.toggle()
+						}
+					},
+					including: truncated && !expanded ? .all : .subviews
+				)
 
 			if truncated {
 				Button(action: {
@@ -53,3 +58,38 @@ struct ExpandableText: View {
 	}
 }
 
+extension ExpandableText {
+	private static func _markdown(_ text: String) -> AttributedString {
+		var result = AttributedString()
+
+		for (index, line) in text.split(omittingEmptySubsequences: false, whereSeparator: \.isNewline).enumerated() {
+			if index > 0 {
+				result += AttributedString("\n")
+			}
+
+			let indent = String(line.prefix { $0 == " " || $0 == "\t" })
+			var content = String(line.dropFirst(indent.count))
+			var isHeader = false
+
+			let level = content.prefix { $0 == "#" }.count
+			if (1...6).contains(level), content.dropFirst(level).first == " " {
+				content = String(content.dropFirst(level + 1))
+				isHeader = true
+			} else if let marker = content.first, "-*+".contains(marker), content.dropFirst().first == " " {
+				content = "• " + content.dropFirst(2)
+			}
+
+			var part = (try? AttributedString(
+				markdown: indent + content,
+				options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+			)) ?? AttributedString(indent + content)
+
+			if isHeader {
+				part.inlinePresentationIntent = .stronglyEmphasized
+			}
+			result += part
+		}
+
+		return result
+	}
+}

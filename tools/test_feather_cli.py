@@ -57,6 +57,16 @@ DELETED.clear()
 cli.replace_older(LIBRARY[4])
 assert DELETED == []                                # no bundle id, nothing to match on
 
+ANSWERS = [None, None, {"message": "ok"}]
+WATCHED = []
+cli.call = lambda method, path, **kwargs: ANSWERS.pop(0)
+REAL_SLEEP, REAL_WATCH = cli.time.sleep, cli.watch_install
+cli.time.sleep, cli.watch_install = (lambda _: None), WATCHED.append
+
+cli.install("u1")
+assert ANSWERS == [] and WATCHED == ["u1"]
+cli.time.sleep, cli.watch_install = REAL_SLEEP, REAL_WATCH
+
 # MARK: pairing
 
 cli.call = REAL_CALL

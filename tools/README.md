@@ -70,7 +70,9 @@ those), and installs show installd's own progress, polled from `/v1/apps/{uuid}/
 goes to stderr, so `feather apps | grep ...` stays clean.
 
 `install` hands the app to Feather's own install sheet, so it obeys whichever installation method is
-set in Settings (server or idevice) and needs Feather to be in the foreground.
+set in Settings (server or idevice) and needs Feather to be in the foreground. If it is in the
+background, the device gets a notification and the command waits until it is tapped (or Feather is
+opened some other way).
 
 ## Protocol
 

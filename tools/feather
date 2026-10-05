@@ -227,7 +227,7 @@ def config():
 
 
 def call(method, path, body=None, upload=None, query=None, timeout=900, raw=False,
-         host=None, token=None):
+         host=None, token=None, quiet=()):
     if host is None:
         host, token = config()
     url = host + path
@@ -250,6 +250,8 @@ def call(method, path, body=None, upload=None, query=None, timeout=900, raw=Fals
     try:
         response = urllib.request.urlopen(request, timeout=timeout)
     except urllib.error.HTTPError as error:
+        if error.code in quiet:
+            return None
         detail = error.read().decode(errors="replace")
         try:
             detail = json.loads(detail).get("reason", detail)
@@ -478,7 +480,6 @@ def cmd_sign(args):
         "name": args.name,
         "identifier": args.bundle_id,
         "version": args.version,
-        "install": bool(args.install),
     }
     body = {k: v for k, v in body.items() if v is not None}
     uuid = resolve(args.app)
@@ -492,7 +493,7 @@ def cmd_sign(args):
         replace_older(app)
 
     if args.install:
-        watch_install(app["uuid"])
+        install(app["uuid"])
 
 
 def watch_install(uuid, timeout=600):
@@ -516,10 +517,23 @@ def watch_install(uuid, timeout=600):
     done("installing", "gave up waiting, check the device")
 
 
-def cmd_install(args):
-    uuid = resolve(args.app)
-    print(call("POST", "/v1/apps/%s/install" % uuid, timeout=60).get("message", "ok"))
+def install(uuid):
+    path = "/v1/apps/%s/install" % uuid
+    result = call("POST", path, timeout=60, quiet=(409,))
+
+    if result is None:
+        print("Feather is in the background, tap its notification on the device to install.", file=sys.stderr)
+        with waiting("waiting"):
+            while result is None:
+                time.sleep(1)
+                result = call("POST", path, timeout=60, quiet=(409,))
+
+    print(result.get("message", "ok"))
     watch_install(uuid)
+
+
+def cmd_install(args):
+    install(resolve(args.app))
 
 
 def cmd_export(args):

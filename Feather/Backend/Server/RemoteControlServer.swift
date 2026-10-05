@@ -11,6 +11,7 @@ import CoreData
 import UIKit
 import OSLog
 import CryptoKit
+import UserNotifications
 import NimbleExtensions
 import IDeviceSwift
 
@@ -36,6 +37,7 @@ final class RemoteControlServer: ObservableObject {
 	private var _app: Application?
 	private var _pendingPair: CheckedContinuation<String, Error>?
 	private var _pendingAlert: UIAlertController?
+	private var _askedToOpen: Set<String> = []
 
 	private init() {}
 
@@ -118,6 +120,7 @@ final class RemoteControlServer: ObservableObject {
 
 			try app.server.start()
 			_app = app
+			UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
 			isRunning = true
 			lastError = nil
 			_startKeepAlive()
@@ -747,14 +750,27 @@ extension RemoteControlServer {
 	/// Hands off to the librarys install sheet, which owns both the server and idevice paths.
 	private static func _install(uuid: String) async throws {
 		try await MainActor.run {
-			guard _find(uuid) != nil else {
+			guard let app = _find(uuid) else {
 				throw Abort(.notFound, reason: "No app with uuid \(uuid)")
 			}
 
+			let reminder = "Feather.remoteInstall.\(uuid)"
+
 			guard UIApplication.shared.applicationState == .active else {
+				// iOS won't let Feather bring itself up, so ask the person holding the device
+				if shared._askedToOpen.insert(uuid).inserted {
+					let content = UNMutableNotificationContent()
+					content.title = app.name ?? Bundle.main.name
+					content.body = .localized("Tap to open Feather and install.")
+					content.sound = .default
+					UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: reminder, content: content, trigger: nil))
+				}
+
 				throw Abort(.conflict, reason: "Feather must be open on the device to install")
 			}
 
+			shared._askedToOpen.remove(uuid)
+			UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [reminder])
 			NotificationCenter.default.post(name: Notification.Name("Feather.installApp"), object: uuid)
 		}
 	}

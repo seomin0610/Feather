@@ -98,6 +98,7 @@ struct InstallPreviewView: View {
 				case .completed, .broken(_):
 					progressTask?.cancel()
 					progressTask = nil
+					installer.clean()
 					#if !targetEnvironment(macCatalyst)
 					BackgroundAudioManager.shared.stop()
 					#endif
@@ -161,8 +162,10 @@ struct InstallPreviewView: View {
 			&& app.identifier == Bundle.main.bundleIdentifier
 				
 		Task.detached {
+			let handler = await ArchiveHandler(app: app, viewModel: viewModel)
+			let servesPackage = await MainActor.run { !isSharing && !installsThroughServer && _installationMethod == 0 }
+			
 			do {
-				let handler = await ArchiveHandler(app: app, viewModel: viewModel)
 				try await handler.move()
 				
 				let packageUrl = try await handler.archive()
@@ -206,7 +209,12 @@ struct InstallPreviewView: View {
 						}
 					}
 				}
+				
+				if !servesPackage {
+					try? await handler.clean()
+				}
 			} catch {
+				try? await handler.clean()
 				await progressTask?.cancel()
 				
 				await MainActor.run {

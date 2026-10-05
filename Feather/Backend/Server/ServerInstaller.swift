@@ -36,6 +36,13 @@ class ServerInstaller: Identifiable, ObservableObject {
 	
 	deinit {
 		_shutdownServer()
+		clean()
+	}
+	
+	func clean() {
+		guard let packageUrl else { return }
+		self.packageUrl = nil
+		try? FileManager.default.removeItem(at: packageUrl.deletingLastPathComponent())
 	}
 	
 	private func _setup() throws {

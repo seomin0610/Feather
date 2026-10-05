@@ -46,7 +46,7 @@ extension Storage {
 		let replaceSigned = defaults.object(forKey: "Feather.replaceAppsOnUpdate.signed") as? Bool ?? true
 
 		guard
-			defaults.bool(forKey: "Feather.replaceAppsOnUpdate"),
+			defaults.object(forKey: "Feather.replaceAppsOnUpdate") as? Bool ?? true,
 			!signed || replaceSigned,
 			let identifier,
 			!identifier.isEmpty

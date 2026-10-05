@@ -255,12 +255,15 @@ extension SigningView {
 				}
 			}
 			
-			NavigationLink(.localized("Properties")) {
+			NavigationLink {
 				Form { SigningOptionsView(
 					options: $_temporaryOptions,
 					temporaryOptions: _optionsManager.options
 				)}
 				.navigationTitle(.localized("Properties"))
+			} label: {
+				Text(.localized("Properties"))
+					.foregroundColor(_isSigning ? .disabled() : .primary)
 			}
 		}
 	}

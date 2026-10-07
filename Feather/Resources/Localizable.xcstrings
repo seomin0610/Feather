@@ -1335,6 +1335,40 @@
         }
       }
     },
+    "Allow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "허용"
+          }
+        }
+      }
+    },
+    "Allow this computer to sign and install apps?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow this computer to sign and install apps?"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 컴퓨터가 앱을 서명하고 설치하도록 허용하시겠습니까?"
+          }
+        }
+      }
+    },
     "Alternative Icons" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3203,6 +3237,23 @@
         }
       }
     },
+    "Connect to LocalDevVPN" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connect to LocalDevVPN"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LocalDevVPN에 연결"
+          }
+        }
+      }
+    },
     "Copy" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3292,6 +3343,23 @@
         }
       }
     },
+    "Copy Download URL" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy Download URL"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다운로드 URL 복사"
+          }
+        }
+      }
+    },
     "Copy Download URLs" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3347,6 +3415,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "复制下载连接"
+          }
+        }
+      }
+    },
+    "Copy Pairing Command" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy Pairing Command"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "페어링 명령어 복사"
           }
         }
       }
@@ -4061,6 +4146,23 @@
         }
       }
     },
+    "Deny" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deny"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "거부"
+          }
+        }
+      }
+    },
     "Description" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4168,6 +4270,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wyłącz Liquid Glass"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liquid Glass 비활성화"
           }
         }
       }
@@ -4346,6 +4454,12 @@
             "state" : "translated",
             "value" : "Do you want to download and install this file?"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 파일을 다운로드하고 설치하시겠습니까?"
+          }
         }
       }
     },
@@ -4419,68 +4533,68 @@
         }
       }
     },
-    "Download StosVPN" : {
+    "Download LocalDevVPN" : {
       "comment" : "Don't translate StosVPN, this is for linking the download to the required VPN for idevice",
       "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "تنزيل StosVPN"
+            "value" : "تنزيل LocalDevVPN"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "StosVPN downloaden"
+            "value" : "LocalDevVPN downloaden"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Download StosVPN"
+            "value" : "Download LocalDevVPN"
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Unduh StosVPN"
+            "value" : "Unduh LocalDevVPN"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Scarica StosVPN"
+            "value" : "Scarica LocalDevVPN"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "StosVPN 다운로드"
+            "value" : "LocalDevVPN 다운로드"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pobierz StosVPN"
+            "value" : "Pobierz LocalDevVPN"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "StosVPN’i İndir"
+            "value" : "LocalDevVPN’i İndir"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tải StosVPN"
+            "value" : "Tải LocalDevVPN"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "下载StosVPN"
+            "value" : "下载LocalDevVPN"
           }
         }
       }
@@ -4558,6 +4672,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "下载更新"
+          }
+        }
+      }
+    },
+    "Downloading" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Downloading"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다운로드 중"
           }
         }
       }
@@ -4741,6 +4872,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "启用液态玻璃"
+          }
+        }
+      }
+    },
+    "Enable Remote CLI" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enable Remote CLI"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "원격 CLI 활성화"
           }
         }
       }
@@ -5091,6 +5239,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "输入软件源链接"
+          }
+        }
+      }
+    },
+    "Enter the code shown on the computer." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter the code shown on the computer."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "컴퓨터에 표시된 코드를 입력하세요."
           }
         }
       }
@@ -5878,6 +6043,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "소스를 불러오지 못했어요 (%@)"
+          }
+        }
+      }
+    },
+    "Failed to parse data: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Failed to parse data: %@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "데이터 파싱 실패: %@"
           }
         }
       }
@@ -7634,6 +7816,40 @@
         }
       }
     },
+    "Injection" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Injection"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "주입"
+          }
+        }
+      }
+    },
+    "Invalid server response" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invalid server response"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "잘못된 서버 응답"
+          }
+        }
+      }
+    },
     "Keep PPQ Protection" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7647,6 +7863,57 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "PPQ 보호 유지"
+          }
+        }
+      }
+    },
+    "Keep Running in Background" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep Running in Background"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "백그라운드에서 계속 실행"
+          }
+        }
+      }
+    },
+    "Later" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Later"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "나중에"
+          }
+        }
+      }
+    },
+    "Lets a paired computer import, sign, install and export apps over HTTP. Without the background option, Feather only answers while it is on screen. This always starts off when Feather launches." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lets a paired computer import, sign, install and export apps over HTTP. Without the background option, Feather only answers while it is on screen. This always starts off when Feather launches."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "페어링된 컴퓨터가 HTTP를 통해 앱을 가져오고, 서명하고, 설치하고, 내보낼 수 있게 합니다. 백그라운드 옵션이 꺼져 있으면 Feather가 화면에 표시되는 동안에만 응답합니다. Feather를 실행할 때마다 항상 꺼진 상태로 시작됩니다."
           }
         }
       }
@@ -7685,6 +7952,57 @@
         }
       }
     },
+    "Minimum OS" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minimum OS"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "최소 OS"
+          }
+        }
+      }
+    },
+    "Network error: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Network error: %@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "네트워크 오류: %@"
+          }
+        }
+      }
+    },
+    "Nickname" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nickname"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "표시이름"
+          }
+        }
+      }
+    },
     "No" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7698,6 +8016,286 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "아니요"
+          }
+        }
+      }
+    },
+    "No certificate was specified." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No certificate was specified."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "인증서가 지정되지 않았습니다."
+          }
+        }
+      }
+    },
+    "No data received." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No data received."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "수신된 데이터가 없습니다."
+          }
+        }
+      }
+    },
+    "No release notes available" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No release notes available"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "릴리스 노트가 없습니다"
+          }
+        }
+      }
+    },
+    "No sources to export" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No sources to export"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "내보낼 소스 없음"
+          }
+        }
+      }
+    },
+    "Nothing paired yet." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing paired yet."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "아직 페어링된 컴퓨터가 없습니다."
+          }
+        }
+      }
+    },
+    "Open an [issue](https://github.com/seomin0610/Feather/issues) on GitHub if you want your source to be featured." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "افتح [issues](https://github.com/seomin0610/Feather/issues) على GitHub إذا كنت تريد أن يتم تمييز مصدرك."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erstelle ein [Issue](https://github.com/seomin0610/Feather/issues) auf GitHub wenn du deine Quelle aufgelistet haben möchtest."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open an [issue](https://github.com/seomin0610/Feather/issues) on GitHub if you want your source to be featured."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apri un [problema](https://github.com/seomin0610/Feather/issues) su GitHub se vuoi che la tua fonte sia consigliata."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "소스가 소개되기를 원하신다면 GitHub에서 [이슈](https://github.com/seomin0610/Feather/issues)를 등록해 주세요."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otwórz [issue](https://github.com/seomin0610/Feather/issues) na GitHubie, jeśli chcesz, aby Twoje źródło zostało wyróżnione."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaynağınızın öne çıkarılmasını istiyorsanız GitHub’da bir [sorun kaydı](https://github.com/seomin0610/Feather/issues) açın."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mở [issue](https://github.com/seomin0610/Feather/issues) trên GitHub nếu bạn muốn nguồn của mình được giới thiệu."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开启一个[issue](https://github.com/seomin0610/Feather/issues)"
+          }
+        }
+      }
+    },
+    "Pair" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pair"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "페어링"
+          }
+        }
+      }
+    },
+    "Paired Computers" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paired Computers"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "페어링된 컴퓨터"
+          }
+        }
+      }
+    },
+    "Pairing Code" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pairing Code"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "페어링 코드"
+          }
+        }
+      }
+    },
+    "Pairing Request" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pairing Request"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "페어링 요청"
+          }
+        }
+      }
+    },
+    "PlugIns" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PlugIns"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "플러그인"
+          }
+        }
+      }
+    },
+    "Port" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Port"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "포트"
+          }
+        }
+      }
+    },
+    "Remote CLI" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remote CLI"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "원격 CLI"
+          }
+        }
+      }
+    },
+    "Removing mach-O load paths failed." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Removing mach-O load paths failed."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mach-O 로드 경로 제거에 실패했습니다."
           }
         }
       }
@@ -7719,6 +8317,23 @@
         }
       }
     },
+    "Run the pairing command on the computer. This device asks before anything is paired, and swiping a row away cuts that computer off." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Run the pairing command on the computer. This device asks before anything is paired, and swiping a row away cuts that computer off."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "컴퓨터에서 페어링 명령어를 실행하세요. 페어링 전에 이 기기에서 먼저 확인을 요청하며, 항목을 밀어서 삭제하면 해당 컴퓨터의 연결이 끊어집니다."
+          }
+        }
+      }
+    },
     "Sign & Install" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7732,6 +8347,159 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "서명 후 설치"
+          }
+        }
+      }
+    },
+    "Signing failed." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Signing failed."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서명에 실패했습니다."
+          }
+        }
+      }
+    },
+    "Socket" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Socket"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "소켓"
+          }
+        }
+      }
+    },
+    "Status" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Status"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "상태"
+          }
+        }
+      }
+    },
+    "Stopped" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stopped"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "중지됨"
+          }
+        }
+      }
+    },
+    "Success" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Success"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "성공"
+          }
+        }
+      }
+    },
+    "Suspend" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suspend"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일시 중단"
+          }
+        }
+      }
+    },
+    "Tap to open Feather and install." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to open Feather and install."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "탭하여 Feather를 열고 설치하세요."
+          }
+        }
+      }
+    },
+    "The code did not match, nothing was paired." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The code did not match, nothing was paired."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "코드가 일치하지 않아 페어링되지 않았습니다."
+          }
+        }
+      }
+    },
+    "The URL is invalid." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The URL is invalid."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL이 올바르지 않습니다."
           }
         }
       }
@@ -7766,6 +8534,57 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "PPQ 보호 끄고 서명"
+          }
+        }
+      }
+    },
+    "Unable to connect to TCP. Make sure you have loopback VPN enabled and you are on WiFi or Airplane mode." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unable to connect to TCP. Make sure you have loopback VPN enabled and you are on WiFi or Airplane mode."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TCP에 연결할 수 없습니다. 루프백 VPN이 활성화되어 있고 Wi-Fi 또는 에어플레인 모드인지 확인하세요."
+          }
+        }
+      }
+    },
+    "Unable to locate bundle path." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unable to locate bundle path."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "번들 경로를 찾을 수 없습니다."
+          }
+        }
+      }
+    },
+    "Unable to locate info.plist path." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unable to locate info.plist path."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Info.plist 경로를 찾을 수 없습니다."
           }
         }
       }
@@ -9667,6 +10486,12 @@
             "state" : "translated",
             "value" : "Merge Entitlements"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "권한 병합"
+          }
         }
       }
     },
@@ -11175,65 +12000,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "打开"
-          }
-        }
-      }
-    },
-    "Open an [issue](https://github.com/khcrysalis/Feather/issues) on GitHub if you want your source to be featured." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "افتح [issues](https://github.com/khcrysalis/Feather/issues) على GitHub إذا كنت تريد أن يتم تمييز مصدرك."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erstelle ein [Issue](https://github.com/khcrysalis/Feather/issues) auf GitHub wenn du deine Quelle aufgelistet haben möchtest."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open an [issue](https://github.com/khcrysalis/Feather/issues) on GitHub if you want your source to be featured."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Apri un [problema](https://github.com/khcrysalis/Feather/issues) su GitHub se vuoi che la tua fonte sia consigliata."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "소스가 소개되기를 원하신다면 GitHub에서 [이슈](https://github.com/khcrysalis/Feather/issues)를 등록해 주세요."
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Otwórz [issue](https://github.com/khcrysalis/Feather/issues) na GitHubie, jeśli chcesz, aby Twoje źródło zostało wyróżnione."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kaynağınızın öne çıkarılmasını istiyorsanız GitHub’da bir [sorun kaydı](https://github.com/khcrysalis/Feather/issues) açın."
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mở [issue](https://github.com/khcrysalis/Feather/issues) trên GitHub nếu bạn muốn nguồn của mình được giới thiệu."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "开启一个[issue](https://github.com/khcrysalis/Feather/issues)"
           }
         }
       }
@@ -17434,6 +18200,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "This option merges entitlements with the embedded entitlements from the app you're signing."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 옵션은 선택한 권한을 서명 중인 앱에 포함된 권한과 병합합니다."
           }
         }
       }

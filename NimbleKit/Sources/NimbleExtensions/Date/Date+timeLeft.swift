@@ -33,7 +33,7 @@ extension Date {
 		let color = Color.expiration(days: daysLeft)
 		
 		let formatter = Date._expirationFormatter(for: timeLeft)
-		let timeString = formatter.string(from: timeLeft) ?? .localized("%lld days", arguments: daysLeft)
+		let timeString = formatter.string(from: timeLeft) ?? .localized("%lld Days", arguments: daysLeft)
 		
 		return ExpirationInfo(
 			formatted: timeString,

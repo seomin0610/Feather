@@ -614,11 +614,11 @@ enum SigningFileHandlerError: Error, LocalizedError {
 	
 	var errorDescription: String? {
 		switch self {
-		case .appNotFound: "Unable to locate bundle path."
-		case .infoPlistNotFound: "Unable to locate info.plist path."
-		case .missingCertifcate: "No certificate was specified."
-		case .disinjectFailed: "Removing mach-O load paths failed."
-		case .signFailed: "Signing failed."
+		case .appNotFound: .localized("Unable to locate bundle path.")
+		case .infoPlistNotFound: .localized("Unable to locate info.plist path.")
+		case .missingCertifcate: .localized("No certificate was specified.")
+		case .disinjectFailed: .localized("Removing mach-O load paths failed.")
+		case .signFailed: .localized("Signing failed.")
 		}
 	}
 }

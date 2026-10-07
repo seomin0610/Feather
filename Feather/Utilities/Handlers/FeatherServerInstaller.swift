@@ -46,7 +46,7 @@ enum FeatherServerInstaller {
 		)
 
 		guard let http = response as? HTTPURLResponse else {
-			throw FeatherServerInstallerError(message: "Invalid server response")
+			throw FeatherServerInstallerError(message: .localized("Invalid server response"))
 		}
 
 		guard (200..<300).contains(http.statusCode) else {

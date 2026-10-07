@@ -18,10 +18,10 @@ public class NBFetchService {
 		
 		public var errorDescription: String? {
 			switch self {
-			case .invalidURL: "The URL is invalid."
-			case .networkError(let error): "Network error: \(error.localizedDescription)"
-			case .noData: "No data received."
-			case .parsingError(let error): "Failed to parse data: \(error.localizedDescription)"
+			case .invalidURL: NSLocalizedString("The URL is invalid.", comment: "")
+			case .networkError(let error): String(format: NSLocalizedString("Network error: %@", comment: ""), error.localizedDescription)
+			case .noData: NSLocalizedString("No data received.", comment: "")
+			case .parsingError(let error): String(format: NSLocalizedString("Failed to parse data: %@", comment: ""), error.localizedDescription)
 			}
 		}
 	}

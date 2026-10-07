@@ -107,6 +107,10 @@ final class SigningHandler: NSObject {
 			try await _mergeEntitlements(for: movedAppPath, with: _options)
 		}
 		
+		if _options.appEntitlementsFile == nil {
+			try _fixProfileEntitlements()
+		}
+		
 		let handler = ZsignHandler(appUrl: movedAppPath, options: _options, cert: appCertificate)
 		try await handler.disinject()
 		
@@ -472,6 +476,7 @@ extension SigningHandler {
 		
 		var baseDictionary: [String: Any] = (ourEntitlements.Entitlements ?? [:]).mapValues { $0.value }
 		let additionsDictionary: [String: Any] = binaryEntitlementsDict
+		_fixICloudServices(in: &baseDictionary)
 
 		
 		// replaces wildcards in base entitlements with new application id
@@ -537,8 +542,39 @@ extension SigningHandler {
 			baseDictionary["keychain-access-groups"] = updatedGroups
 		}
 		
+		try _writeEntitlements(baseDictionary)
+	}
+	
+	private func _fixProfileEntitlements() throws {
+		guard
+			let cert = self.appCertificate,
+			let ourEntitlements = CertificateReader(Storage.shared.getFile(.provision, from: cert)).decoded
+		else {
+			return
+		}
+		
+		var entitlements: [String: Any] = (ourEntitlements.Entitlements ?? [:]).mapValues { $0.value }
+		
+		if _fixICloudServices(in: &entitlements) {
+			try _writeEntitlements(entitlements)
+		}
+	}
+	
+	// profiles grant iCloud as `icloud-services = "*"`, but a signed binary must list concrete
+	// services, CloudKit throws CKException ("malformed entitlements") on the string
+	@discardableResult
+	private func _fixICloudServices(in entitlements: inout [String: Any]) -> Bool {
+		guard entitlements["com.apple.developer.icloud-services"] is String else {
+			return false
+		}
+		
+		entitlements["com.apple.developer.icloud-services"] = ["CloudKit", "CloudDocuments"]
+		return true
+	}
+	
+	private func _writeEntitlements(_ entitlements: [String: Any]) throws {
 		let plistData = try PropertyListSerialization.data(
-			fromPropertyList: baseDictionary,
+			fromPropertyList: entitlements,
 			format: .xml,
 			options: 0
 		)

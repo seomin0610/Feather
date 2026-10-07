@@ -14,6 +14,13 @@
       "tintColor": "848ef9",
       "versions": [
         {
+          "version": "2.9.3",
+          "date": "2026-10-07T15:51:24Z",
+          "size": 14339905,
+          "downloadURL": "https://github.com/seomin0610/Feather/releases/download/v2.9.3/Feather.ipa",
+          "localizedDescription": "## What's New\r\n- **Remote CLI**: import, sign, install and export apps from a computer\r\n- Signing, installing and remote imports shown in the Dynamic Island\r\n- Remote imports and signing progress shown on the device\r\n- Open / Update buttons on store listings for installed apps\r\n- Apps are replaced on update by default\r\n- Markdown rendering in release notes\r\n- Display the app's minimum iOS version before signing (#721)\r\n- Entitlement merging (#723)\r\n- Complete Korean translations\r\n\r\n## Bug Fixes\r\n- Fixed wildcard iCloud services entitlement\r\n- Properties is grayed out while signing\r\n- Background audio keeps running until every holder stops it\r\n- Install work folder is deleted once the install is done\r\n- Library progress bar stays visible for the whole remote import\r\n- Fixed typo in Reset Sources alert title (#718)\r\n- Fixed Zsign build (#717)\r\n\r\n**Full Changelog**: https://github.com/seomin0610/Feather/compare/v2.9.2...v2.9.3"
+        },
+        {
           "version": "2.9.2",
           "date": "2026-09-19T06:45:00Z",
           "size": 14230046,
@@ -39,13 +46,22 @@
         "https://github.com/khcrysalis/Feather/blob/v1.x/Images/Sign.png?raw=true",
         "https://github.com/khcrysalis/Feather/blob/v1.x/Images/Store.png?raw=true"
       ],
-      "version": "2.9.2",
-      "versionDate": "2026-09-19T06:45:00Z",
-      "size": 14230046,
-      "downloadURL": "https://github.com/seomin0610/Feather/releases/download/v2.9.2/Feather.ipa"
+      "version": "2.9.3",
+      "versionDate": "2026-10-07T15:51:24Z",
+      "size": 14339905,
+      "downloadURL": "https://github.com/seomin0610/Feather/releases/download/v2.9.3/Feather.ipa"
     }
   ],
   "news": [
+    {
+      "title": "Feather 2.9.3 업데이트",
+      "identifier": "feather-update-2.9.3",
+      "caption": "Feather has been updated to version 2.9.3. Visit Web signer to update.",
+      "tintColor": "8A28F7",
+      "url": "https://signer.waterwave.space",
+      "date": "2026-10-07",
+      "notify": true
+    },
     {
       "title": "Feather 2.9.2 업데이트",
       "identifier": "feather-update-2.9.2",

@@ -10,7 +10,7 @@ import WidgetKit
 struct UpdatesWidget: Widget {
 	var body: some WidgetConfiguration {
 		StaticConfiguration(kind: "Updates", provider: UpdatesProvider()) { entry in
-			UpdatesWidgetView(snapshot: entry.snapshot)
+			UpdatesWidgetView(snapshot: entry.snapshot, date: entry.date)
 		}
 		.configurationDisplayName("Updates")
 		.description("Shows available app updates.")
@@ -19,7 +19,7 @@ struct UpdatesWidget: Widget {
 }
 
 struct UpdatesEntry: TimelineEntry {
-	let date = Date()
+	var date = Date()
 	let snapshot: UpdateWidgetSnapshot?
 }
 
@@ -33,12 +33,25 @@ struct UpdatesProvider: TimelineProvider {
 	}
 
 	func getTimeline(in context: Context, completion: @escaping (Timeline<UpdatesEntry>) -> Void) {
-		completion(Timeline(entries: [UpdatesEntry(snapshot: .load())], policy: .never))
+		let snapshot = UpdateWidgetSnapshot.load()
+		let now = Date()
+		var dates = [now]
+
+		if let checkedAt = snapshot?.checkedAt {
+			let steps = (1..<60).map { Double($0) * 60 } + (1...24).map { Double($0) * 3600 }
+			dates += steps.map { checkedAt.addingTimeInterval($0) }.filter { $0 > now }
+		}
+
+		completion(Timeline(
+			entries: dates.map { UpdatesEntry(date: $0, snapshot: snapshot) },
+			policy: .after((dates.last ?? now).addingTimeInterval(3600))
+		))
 	}
 }
 
 struct UpdatesWidgetView: View {
 	let snapshot: UpdateWidgetSnapshot?
+	var date = Date()
 
 	private let _tint = Color(red: 0x84 / 255, green: 0x8e / 255, blue: 0xf9 / 255)
 
@@ -71,9 +84,15 @@ struct UpdatesWidgetView: View {
 				Spacer(minLength: 0)
 				Text("Up to Date")
 					.font(.headline)
-				Text("\(Text(snapshot.checkedAt, style: .relative)) ago")
-					.font(.caption)
-					.foregroundStyle(.secondary)
+				Group {
+					if date.timeIntervalSince(snapshot.checkedAt) < 60 {
+						Text("\(Text(snapshot.checkedAt, style: .relative)) ago")
+					} else {
+						Text(_relativeFormatter.localizedString(for: snapshot.checkedAt, relativeTo: date))
+					}
+				}
+				.font(.caption)
+				.foregroundStyle(.secondary)
 			} else {
 				Image(systemName: "arrow.down.circle.fill")
 					.font(.title2)
@@ -86,6 +105,12 @@ struct UpdatesWidgetView: View {
 		}
 		.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
 		.widgetBackground()
+	}
+
+	private var _relativeFormatter: RelativeDateTimeFormatter {
+		let formatter = RelativeDateTimeFormatter()
+		formatter.dateTimeStyle = .named
+		return formatter
 	}
 
 	private func _appsLine(_ apps: [UpdateWidgetSnapshot.App]) -> Text {

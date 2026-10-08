@@ -12,6 +12,7 @@ import BackgroundTasks
 import CoreData
 import Foundation
 import NimbleJSON
+import UIKit
 
 struct AppUpdate: Identifiable, Equatable {
 	let id: String
@@ -194,10 +195,31 @@ final class UpdateManager: ObservableObject {
 	}
 
 	private func _saveWidgetSnapshot() {
+		let fileManager = FileManager.default
+		var apps: [(name: String, bundleURL: URL?)] = pendingUpdates.map { update in
+			let directory = update.isSigned ? fileManager.signed(update.localUUID) : fileManager.unsigned(update.localUUID)
+			return (update.appName, fileManager.getPath(in: directory, for: "app"))
+		}
+		if featherUpdate != nil {
+			apps.insert(("Feather", Bundle.main.bundleURL), at: 0)
+		}
+
 		UpdateWidgetSnapshot(
-			appNames: (featherUpdate == nil ? [] : ["Feather"]) + pendingUpdates.map(\.appName),
+			apps: apps.enumerated().map { index, app in
+				UpdateWidgetSnapshot.App(name: app.name, icon: index < 3 ? _widgetIcon(for: app.bundleURL) : nil)
+			},
 			checkedAt: lastCheckedDate ?? Date()
 		).save()
+	}
+
+	private func _widgetIcon(for bundleURL: URL?) -> Data? {
+		guard let bundleURL, let icon = iconTest(bundleURL) else { return nil }
+
+		let format = UIGraphicsImageRendererFormat()
+		format.scale = 1
+		return UIGraphicsImageRenderer(size: CGSize(width: 42, height: 42), format: format).pngData { _ in
+			icon.draw(in: CGRect(x: 0, y: 0, width: 42, height: 42))
+		}
 	}
 
 	func checkForUpdates(

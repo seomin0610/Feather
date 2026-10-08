@@ -25,7 +25,7 @@ struct UpdatesEntry: TimelineEntry {
 
 struct UpdatesProvider: TimelineProvider {
 	func placeholder(in context: Context) -> UpdatesEntry {
-		UpdatesEntry(snapshot: UpdateWidgetSnapshot(appNames: ["Feather", "YouTube"], checkedAt: Date()))
+		UpdatesEntry(snapshot: UpdateWidgetSnapshot(apps: [.init(name: "Feather"), .init(name: "YouTube")], checkedAt: Date()))
 	}
 
 	func getSnapshot(in context: Context, completion: @escaping (UpdatesEntry) -> Void) {
@@ -44,17 +44,23 @@ struct UpdatesWidgetView: View {
 
 	var body: some View {
 		VStack(alignment: .leading, spacing: 2) {
-			if let snapshot, !snapshot.appNames.isEmpty {
+			if let snapshot, !snapshot.apps.isEmpty {
 				Image(systemName: "arrow.down.circle.fill")
 					.font(.title2)
 					.foregroundStyle(_tint)
 				Spacer(minLength: 0)
-				Text("\(snapshot.appNames.count)")
-					.font(.system(size: 40, weight: .bold, design: .rounded))
-					.foregroundStyle(_tint)
-				Text(LocalizedStringKey(snapshot.appNames.count == 1 ? "Update" : "Updates"))
+				HStack(alignment: .firstTextBaseline, spacing: 3) {
+					Text("\(snapshot.apps.count)")
+						.font(.system(size: 40, weight: .bold, design: .rounded))
+					Text(LocalizedStringKey(snapshot.apps.count == 1 ? "app" : "apps"))
+						.font(.subheadline.weight(.semibold))
+				}
+				.foregroundStyle(_tint)
+				Text("Updates Available")
 					.font(.subheadline.weight(.semibold))
-				Text(snapshot.appNames.joined(separator: ", "))
+					.lineLimit(1)
+					.minimumScaleFactor(0.8)
+				_appsLine(snapshot.apps)
 					.font(.caption)
 					.foregroundStyle(.secondary)
 					.lineLimit(1)
@@ -80,6 +86,16 @@ struct UpdatesWidgetView: View {
 		}
 		.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
 		.widgetBackground()
+	}
+
+	private func _appsLine(_ apps: [UpdateWidgetSnapshot.App]) -> Text {
+		apps.enumerated().reduce(Text(verbatim: "")) { line, item in
+			let separator = item.offset == 0 ? "" : ", "
+			let icon = item.element.icon
+				.flatMap { UIImage(data: $0, scale: 3) }
+				.map { Text("\(Text(Image(uiImage: $0).renderingMode(.original)).baselineOffset(-3)) ") } ?? Text(verbatim: "")
+			return Text("\(line)\(separator)\(icon)\(item.element.name)")
+		}
 	}
 }
 

@@ -10,7 +10,12 @@ import WidgetKit
 // keychain instead of an app group, sideloading profiles rarely grant app groups
 // but signing gives the app and its extensions the same keychain-access-groups
 struct UpdateWidgetSnapshot: Codable {
-	var appNames: [String]
+	struct App: Codable {
+		var name: String
+		var icon: Data?
+	}
+
+	var apps: [App]
 	var checkedAt: Date
 
 	private static let _query: [String: Any] = [

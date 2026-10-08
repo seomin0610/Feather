@@ -45,6 +45,7 @@ $(PLATFORMS): deps
 	mkdir -p _build/Payload
 	cp -R _build/Applications/*.app _build/Payload/Feather.app
 	chmod -R 0755 _build/Payload/Feather.app
+	find _build/Payload/Feather.app -name '*.appex' -exec codesign --force --sign - --timestamp=none {} \;
 	codesign --force --sign - --timestamp=none _build/Payload/Feather.app
 	cp deps/* _build/Payload/Feather.app/ || true
 

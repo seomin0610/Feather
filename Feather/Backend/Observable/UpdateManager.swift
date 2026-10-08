@@ -6,6 +6,9 @@
 //
 
 import AltSourceKit
+#if !targetEnvironment(macCatalyst)
+import BackgroundTasks
+#endif
 import CoreData
 import Foundation
 import NimbleJSON
@@ -169,8 +172,8 @@ final class UpdateManager: ObservableObject {
 	}
 
 	func removeUpdate(for uuid: String?) {
-		guard let uuid else { return }
-		updates[uuid] = nil
+		guard let uuid, updates.removeValue(forKey: uuid) != nil else { return }
+		_saveWidgetSnapshot()
 	}
 
 	/// Clears updates satisfied by a newly imported version.
@@ -186,6 +189,15 @@ final class UpdateManager: ObservableObject {
 		{
 			self.featherUpdate = nil
 		}
+
+		_saveWidgetSnapshot()
+	}
+
+	private func _saveWidgetSnapshot() {
+		UpdateWidgetSnapshot(
+			appNames: (featherUpdate == nil ? [] : ["Feather"]) + pendingUpdates.map(\.appName),
+			checkedAt: lastCheckedDate ?? Date()
+		).save()
 	}
 
 	func checkForUpdates(
@@ -198,6 +210,7 @@ final class UpdateManager: ObservableObject {
 		defer {
 			isChecking = false
 			lastCheckedDate = Date()
+			_saveWidgetSnapshot()
 		}
 		
 		let repositories = await _fetchRepositories(from: sources)
@@ -400,6 +413,36 @@ final class UpdateManager: ObservableObject {
 		}
 	}
 }
+
+#if !targetEnvironment(macCatalyst)
+extension UpdateManager {
+	nonisolated static let backgroundCheckIdentifier = "thewonderofyou.Feather.updateCheck"
+
+	nonisolated static func registerBackgroundCheck() {
+		BGTaskScheduler.shared.register(forTaskWithIdentifier: backgroundCheckIdentifier, using: .main) { task in
+			scheduleBackgroundCheck()
+
+			let work = Task { @MainActor in
+				await UpdateManager.shared.checkForUpdatesIfNeeded()
+				task.setTaskCompleted(success: true)
+			}
+
+			task.expirationHandler = {
+				work.cancel()
+				task.setTaskCompleted(success: false)
+			}
+		}
+
+		scheduleBackgroundCheck()
+	}
+
+	nonisolated static func scheduleBackgroundCheck() {
+		let request = BGAppRefreshTaskRequest(identifier: backgroundCheckIdentifier)
+		request.earliestBeginDate = Date(timeIntervalSinceNow: 60 * 60)
+		try? BGTaskScheduler.shared.submit(request)
+	}
+}
+#endif
 
 private struct SourceMetadataCandidate {
 	let appUUID: String

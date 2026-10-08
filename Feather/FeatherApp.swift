@@ -175,6 +175,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 		ResetView.clearWorkCache()
 		_addDefaultCertificates()
 		RemoteControlServer.shared.resetOnLaunch()
+		#if !targetEnvironment(macCatalyst)
+		UpdateManager.registerBackgroundCheck()
+		#endif
 		return true
 	}
 	

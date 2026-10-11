@@ -145,7 +145,7 @@ class DownloadManager: NSObject, ObservableObject {
 		download.task?.cancel()
 		
 		// outside the lookup below: a download already off the list can still own a running task
-		LiveTask.stop(download.id, success: false)
+		LiveTask.stop(download.id)
 		
 		if let index = downloads.firstIndex(where: { $0.id == download.id }) {
 			downloads.remove(at: index)

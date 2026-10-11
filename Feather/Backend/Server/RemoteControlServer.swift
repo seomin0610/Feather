@@ -643,7 +643,7 @@ extension RemoteControlServer {
 		}
 
 		await MainActor.run {
-			LiveTask.stop(download.id, success: true)
+			LiveTask.stop(download.id)
 			DownloadManager.shared.cancelDownload(download)
 		}
 

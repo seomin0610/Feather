@@ -27,13 +27,13 @@ class BackgroundTaskManager: ObservableObject {
 		finishedTasks.remove(taskIdentifier)
 		
 		if !registeredTasks.contains(taskIdentifier) {
-			BGTaskScheduler.shared.register(forTaskWithIdentifier: taskIdentifier, using: nil) { task in
+			BGTaskScheduler.shared.register(forTaskWithIdentifier: taskIdentifier, using: .main) { task in
 				guard let task = task as? BGContinuedProcessingTask else { return }
 				self.activeTasks[task.identifier] = task
 				
 				// short work can be over before this runs, don't leave it spinning
 				if self.finishedTasks.remove(task.identifier) != nil {
-					self.stopTask(identifier: task.identifier, success: true)
+					self.stopTask(identifier: task.identifier)
 					return
 				}
 				
@@ -42,6 +42,7 @@ class BackgroundTaskManager: ObservableObject {
 						DownloadManager.shared.cancelDownload(download)
 					}
 					self.activeTasks.removeValue(forKey: task.identifier)
+					task.setTaskCompleted(success: true)
 				}
 			}
 			self.registeredTasks.insert(taskIdentifier)
@@ -71,21 +72,22 @@ class BackgroundTaskManager: ObservableObject {
 		task.updateTitle(task.title, subtitle: subtitle.map { "\($0) \(percentage)" } ?? percentage)
 		
 		if task.progress.completedUnitCount >= task.progress.totalUnitCount {
-			stopTask(identifier: taskIdentifier, success: true)
+			stopTask(identifier: taskIdentifier)
 		}
 	}
 	
-	func stopTask(for downloadId: String, success: Bool) {
-		stopTask(identifier: "\(baseId).\(downloadId.md5)", success: success)
+	func stopTask(for downloadId: String) {
+		stopTask(identifier: "\(baseId).\(downloadId.md5)")
 	}
 	
-	private func stopTask(identifier: String, success: Bool) {
+	private func stopTask(identifier: String) {
 		guard let task = activeTasks[identifier] else {
 			finishedTasks.insert(identifier)
 			return
 		}
 		
-		task.setTaskCompleted(success: success)
+		// false keeps the failed island up until reboot, failures already show an alert
+		task.setTaskCompleted(success: true)
 		activeTasks.removeValue(forKey: identifier)
 	}
 }
@@ -122,11 +124,11 @@ enum LiveTask {
 		#endif
 	}
 	
-	static func stop(_ id: String, success: Bool = true) {
+	static func stop(_ id: String) {
 		#if !targetEnvironment(macCatalyst)
 		guard #available(iOS 26.0, *) else { return }
 		DispatchQueue.main.async {
-			BackgroundTaskManager.shared.stopTask(for: id, success: success)
+			BackgroundTaskManager.shared.stopTask(for: id)
 		}
 		#endif
 	}

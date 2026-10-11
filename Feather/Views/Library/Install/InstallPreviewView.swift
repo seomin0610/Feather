@@ -68,7 +68,7 @@ struct InstallPreviewView: View {
 		.onReceive(viewModel.$status) { newStatus in
 			switch newStatus {
 			case .completed: LiveTask.update(_taskId, progress: 1.0, subtitle: .localized("Installing"))
-			case .broken: LiveTask.stop(_taskId, success: false)
+			case .broken: LiveTask.stop(_taskId)
 			default: break
 			}
 			
@@ -119,7 +119,7 @@ struct InstallPreviewView: View {
 		#endif
 		
 		.onDisappear {
-			LiveTask.stop(_taskId, success: true)
+			LiveTask.stop(_taskId)
 			progressTask?.cancel()
 			progressTask = nil
 			

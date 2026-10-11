@@ -28,8 +28,23 @@ jobs:
         run: |
           sudo xcode-select -s /Applications/Xcode_26.3.0.app
 
+      - name: Cache Xcode build
+        uses: irgaly/xcode-cache@4141f139f00e335c6e1031fb93e667181f86146f # v1.9.2
+        with:
+          key: deriveddata-${{ matrix.platform }}-${{ github.sha }}
+          restore-keys: deriveddata-${{ matrix.platform }}-
+          deriveddata-directory: ${{ runner.temp }}/Feather/${{ matrix.platform }}
+          swiftpm-cache-key: sourcepackages-${{ matrix.platform }}-${{ hashFiles('**/Package.resolved') }}
+          restore-mtime-targets: |
+            **/Package.swift
+            **/*.xcconfig
+
       - name: Compile Feather
-        run: make ${{ matrix.platform }}
+        env:
+          XCODE_XCCONFIG_FILE: ${{ runner.temp }}/ci.xcconfig
+        run: |
+          echo 'COMPILATION_CACHE_ENABLE_CACHING = YES' > "$XCODE_XCCONFIG_FILE"
+          make ${{ matrix.platform }} TMP=${{ runner.temp }}/Feather
 
       - name: Upload
         uses: actions/upload-artifact@v4

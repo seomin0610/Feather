@@ -23,6 +23,13 @@ jobs:
         run: |
           sudo xcode-select -s /Applications/Xcode_26.3.0.app
 
+      - name: Cache Swift packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/Library/Caches/org.swift.swiftpm
+          key: spm-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: spm-
+
       # MARKETING_VERSION comes from Feather.xcconfig, which agvtool can't read,
       # so take the version from the tag (or the xcconfig when run manually)
       - name: Extract Version

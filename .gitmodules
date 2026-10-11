@@ -4,4 +4,4 @@
 	branch = package
 [submodule "IDeviceKitten"]
 	path = IDeviceKitten
-	url = https://github.com/khcrysalis/IDeviceKit
+	url = https://github.com/seomin0610/IDeviceKit

@@ -866,7 +866,7 @@ extension RemoteControlServer {
 				isDefault: body.makeDefault ?? false
 			) { error in
 				if let error {
-					continuation.resume(throwing: error)
+					continuation.resume(throwing: Abort(.badRequest, reason: error.localizedDescription))
 				} else {
 					continuation.resume()
 				}

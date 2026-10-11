@@ -120,8 +120,12 @@ extension CertificatesAddView {
 			provisionURL: provisionURL,
 			p12Password: _p12Password,
 			certificateName: _certificateName
-		) { _ in
-			dismiss()
+		) { error in
+			if let error {
+				UIAlertController.showAlertWithOk(title: .localized("Error"), message: error.localizedDescription)
+			} else {
+				dismiss()
+			}
 		}
 	}
 }

@@ -7,6 +7,7 @@
 
 import Foundation
 import OSLog
+import ZsignC
 
 final class CertificateFileHandler: NSObject {
 	private let _fileManager = FileManager.default
@@ -39,10 +40,16 @@ final class CertificateFileHandler: NSObject {
 	}
 	
 	func copy() async throws {
-		guard
-			(_certPair != nil)
-		else {
+		guard let certPair = _certPair else {
 			throw CertificateFileHandlerError.certNotValid
+		}
+		
+		// a p12 without its own certificate gets one picked from the profile by zsign, so only a present one can mismatch
+		if
+			let certificate = p12_certificate(_key.path, _keyPassword ?? ""),
+			!(certPair.DeveloperCertificates ?? []).contains(certificate)
+		{
+			throw CertificateFileHandlerError.provisionMismatch
 		}
 		
 		let destinationURL = try await _directory()
@@ -72,6 +79,14 @@ final class CertificateFileHandler: NSObject {
 	}
 }
 
-private enum CertificateFileHandlerError: Error {
+private enum CertificateFileHandlerError: Error, LocalizedError {
 	case certNotValid
+	case provisionMismatch
+	
+	var errorDescription: String? {
+		switch self {
+		case .certNotValid: .localized("The provisioning profile could not be read.")
+		case .provisionMismatch: .localized("This certificate is not in the provisioning profile. Use the p12 and mobileprovision that were issued together.")
+		}
+	}
 }

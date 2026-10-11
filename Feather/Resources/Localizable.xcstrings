@@ -19578,6 +19578,40 @@
           }
         }
       }
+    },
+    "The provisioning profile could not be read." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The provisioning profile could not be read."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "프로비저닝 프로파일을 읽을 수 없습니다."
+          }
+        }
+      }
+    },
+    "This certificate is not in the provisioning profile. Use the p12 and mobileprovision that were issued together." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This certificate is not in the provisioning profile. Use the p12 and mobileprovision that were issued together."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 인증서는 프로비저닝 프로파일에 포함되어 있지 않습니다. 함께 발급된 p12와 mobileprovision을 사용하세요."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

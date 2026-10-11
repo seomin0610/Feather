@@ -56,22 +56,21 @@ enum FR {
 			handler.appCertificate = certificate
 			handler.appIcon = icon
 			
-			// zsign reports no progress, so the island spins instead of faking a percentage:
-			// leaving the task's unit counts alone keeps its Progress indeterminate
 			let task = "FeatherSigning_\(app.uuid ?? UUID().uuidString)"
 			LiveTask.start(task, title: app.name ?? Bundle.main.name, subtitle: .localized("Signing"))
+			handler.onProgress = { LiveTask.update(task, progress: $0, subtitle: .localized("Signing")) }
 			
 			do {
 				try await handler.copy()
 				try await handler.modify()
 				try? await handler.clean()
-				LiveTask.stop(task, success: true)
+				LiveTask.stop(task)
 				await MainActor.run {
 					completion(nil)
 				}
 			} catch {
 				try? await handler.clean()
-				LiveTask.stop(task, success: false)
+				LiveTask.stop(task)
 				await MainActor.run {
 					completion(error)
 				}

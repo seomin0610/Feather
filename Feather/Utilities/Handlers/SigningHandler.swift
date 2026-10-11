@@ -28,6 +28,7 @@ final class SigningHandler: NSObject {
 	// throw an error
 	var appIcon: UIImage?
 	var appCertificate: CertificatePair?
+	var onProgress: ((Double) -> Void)?
 	
 	init(app: AppInfoPresentable, options: Options = OptionsManager.shared.options) {
 		self._app = app
@@ -118,7 +119,7 @@ final class SigningHandler: NSObject {
 			_options.signingOption == .default,
 			appCertificate != nil
 		{
-			try await handler.sign()
+			try await handler.sign(progress: onProgress)
 //		} else if _options.signingOption == .adhoc {
 //			try await handler.adhocSign()
 		} else if _options.signingOption == .onlyModify {
@@ -129,10 +130,6 @@ final class SigningHandler: NSObject {
 		
 		try await self.move()
 		try await self.addToDatabase()
-		
-		if let error = handler.hadError {
-			throw error
-		}
 	}
 	
 	func move() async throws {

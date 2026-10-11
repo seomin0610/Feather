@@ -155,4 +155,38 @@ cli.ensure_tunnel(taken, 8420)  # something already answers, so it must not spaw
 listener.close()
 assert not cli.port_open(taken)
 
+# MARK: usbmuxd pair record
+
+import plistlib
+import struct
+
+RECORD = {"HostID": "H", "HostPrivateKey": b"k"}
+ASKED = {}
+
+
+def fake_usbmuxd(sock, reply):
+    conn, _ = sock.accept()
+    size, version, kind, tag = struct.unpack("<IIII", conn.recv(16))
+    ASKED.update(plistlib.loads(conn.recv(size - 16)), version=version, kind=kind)
+    body = plistlib.dumps(reply)
+    conn.sendall(struct.pack("<IIII", 16 + len(body), 1, 8, tag) + body)
+    conn.close()
+
+
+for reply, expected in (({"PairRecordData": plistlib.dumps(RECORD)}, RECORD), ({"Number": 2}, None)):
+    cli.USBMUXD = os.path.join(tempfile.mkdtemp(), "usbmuxd")
+    mux = socket.socket(socket.AF_UNIX)
+    mux.bind(cli.USBMUXD)
+    mux.listen(1)
+    threading.Thread(target=fake_usbmuxd, args=(mux, reply), daemon=True).start()
+
+    try:
+        got = cli.lockdown_record("udid-1")
+    except SystemExit:
+        got = None                                                 # never paired with this computer
+    assert got == expected
+    assert ASKED["MessageType"] == "ReadPairRecord" and ASKED["PairRecordID"] == "udid-1"
+    assert ASKED["version"] == 1 and ASKED["kind"] == 8            # plist protocol
+    mux.close()
+
 print("ok")

@@ -267,6 +267,10 @@ extension RemoteControlServer {
 		var url: String
 	}
 
+	struct PairingFileRequestModel: Content {
+		var pairingFile: String
+	}
+
 	struct PairedComputer: Content, Identifiable {
 		let id: String
 		let name: String
@@ -369,6 +373,10 @@ extension RemoteControlServer {
 			}
 
 			return OkModel(ok: true, message: "Fetching source, failures are reported on the device")
+		}
+
+		app.post("v1", "pairing") { req async throws -> OkModel in
+			try await Self._setPairing(req.content.decode(PairingFileRequestModel.self))
 		}
 	}
 }
@@ -866,6 +874,23 @@ extension RemoteControlServer {
 		}
 
 		return try await _certificates()
+	}
+
+	private static func _setPairing(_ body: PairingFileRequestModel) async throws -> OkModel {
+		guard
+			let file = FileManager.default.decodeAndWrite(base64: body.pairingFile, pathComponent: ".plist"),
+			let data = try? Data(contentsOf: file),
+			let plist = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any],
+			plist["HostPrivateKey"] != nil || plist["private_key"] != nil
+		else {
+			throw Abort(.badRequest, reason: "Not a pairing file")
+		}
+
+		await MainActor.run {
+			FR.movePairing(file)
+		}
+
+		return OkModel(ok: true, message: "Pairing file replaced")
 	}
 
 	private static func _sources() async throws -> SourceListModel {

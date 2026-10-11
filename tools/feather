@@ -12,9 +12,12 @@ import getpass
 import hashlib
 import json
 import os
+import platform
+import plistlib
 import secrets
 import shutil
 import socket
+import struct
 import subprocess
 import sys
 import tempfile
@@ -23,6 +26,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import zipfile
 
 CONFIG = os.path.expanduser("~/.config/feather-cli.json")
 
@@ -583,6 +587,134 @@ def cmd_cert_add(args):
     cmd_certs(args)
 
 
+USBMUXD = "/var/run/usbmuxd"
+IDEVICE_TOOLS = "v0.1.68"
+IDEVICE_TOOLS_SHA256 = {
+    "linux": "87132c556db29b4fbaab8315f17fd0aa4eda0eee7c887ee80dad59ded68ce87f",
+    "macos-arm": "fc4c2a74a3d2899bc33a7c2ed42d367e843b9dd6854bb3b1b257274b1ce712fa",
+    "macos-intel": "ba27ffd646a06ac411e185607343a8e8da437d1fa52a24a2d7c6411d4d8d1447",
+}
+
+
+def recv_exact(sock, size):
+    data = b""
+    while len(data) < size:
+        chunk = sock.recv(size - len(data))
+        if not chunk:
+            sys.exit("usbmuxd closed the connection")
+        data += chunk
+    return data
+
+
+def lockdown_record(udid):
+    """usbmuxd hands this computer's pairing record to any local user, no root needed."""
+    request = plistlib.dumps({
+        "MessageType": "ReadPairRecord",
+        "PairRecordID": udid,
+        "ClientVersionString": "feather",
+        "ProgName": "feather",
+    })
+
+    try:
+        with socket.socket(socket.AF_UNIX) as sock:
+            sock.connect(USBMUXD)
+            sock.sendall(struct.pack("<IIII", 16 + len(request), 1, 8, 1) + request)
+            size = struct.unpack("<I", recv_exact(sock, 4))[0]
+            reply = plistlib.loads(recv_exact(sock, size - 4)[12:])
+    except OSError as error:
+        sys.exit("Cannot reach usbmuxd: %s" % error)
+
+    if "PairRecordData" not in reply:
+        sys.exit("This computer is not paired with %s. Unlock it, run `idevicepair pair`, "
+                 "tap Trust, then retry." % udid)
+    return plistlib.loads(reply["PairRecordData"])
+
+
+def idevice_tools():
+    """An RP pairing needs a whole RemoteXPC stack, so borrow idevice's own tool for it."""
+    found = shutil.which("idevice-tools")
+    if found:
+        return found
+
+    flavor = {
+        "Linux": "linux",
+        "Darwin": "macos-arm" if platform.machine() == "arm64" else "macos-intel",
+    }.get(platform.system())
+    if flavor is None:
+        sys.exit("No idevice-tools build for this system, put one on PATH")
+
+    path = os.path.expanduser("~/.cache/feather-cli/idevice-tools-" + IDEVICE_TOOLS)
+    if os.path.exists(path):
+        return path
+
+    url = "https://github.com/jkcoxson/idevice/releases/download/%s/idevice-tools-%s-%s.zip" % (
+        IDEVICE_TOOLS, flavor, IDEVICE_TOOLS)
+
+    with tempfile.TemporaryDirectory() as scratch:
+        archive = os.path.join(scratch, "tools.zip")
+        try:
+            with urllib.request.urlopen(url, timeout=300) as response:
+                stream_to_file(response, archive, "idevice")
+        except (urllib.error.URLError, OSError) as error:
+            sys.exit("Cannot download %s: %s" % (url, error))
+
+        # it gets executed, so it has to be exactly the build that was checked
+        with open(archive, "rb") as f:
+            if hashlib.sha256(f.read()).hexdigest() != IDEVICE_TOOLS_SHA256[flavor]:
+                sys.exit("idevice-tools download does not match its pinned checksum")
+
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with zipfile.ZipFile(archive) as bundle, open(path + ".part", "wb") as out:
+            out.write(bundle.read("idevice-tools"))
+
+    os.chmod(path + ".part", 0o755)
+    os.replace(path + ".part", path)
+    return path
+
+
+def rp_keys(udid):
+    """The iOS 17.4+ half. Older versions only read the lockdown record, so this may fail."""
+    tools = idevice_tools()
+
+    with tempfile.TemporaryDirectory() as scratch:
+        path = os.path.join(scratch, "rp.plist")
+        with waiting("pairing"):
+            try:
+                subprocess.run(
+                    [tools, "--udid", udid, "rppairing", "pair",
+                     "Feather-cli (%s)" % socket.gethostname().split(".")[0], path],
+                    capture_output=True, timeout=120,
+                )
+            except (OSError, subprocess.SubprocessError):
+                pass
+
+        if not os.path.exists(path):
+            print("RP pairing failed, sending the lockdown record only (enough below iOS 17.4)",
+                  file=sys.stderr)
+            return {}
+
+        with open(path, "rb") as f:
+            return plistlib.load(f)
+
+
+def cmd_pairing(args):
+    if args.file:
+        with open(args.file, "rb") as f:
+            raw = f.read()
+    else:
+        udid = args.udid or device()[0].get("udid") or pick_udid(args)
+        if not udid:
+            sys.exit("Plug the device in, or pass a pairing file")
+
+        record = lockdown_record(udid)
+        record["UDID"] = udid
+        record.update(rp_keys(udid))
+        raw = plistlib.dumps(record)
+
+    data = base64.b64encode(raw).decode()
+    print(call("POST", "/v1/pairing", body={"pairingFile": data}, timeout=60).get("message", "ok"))
+
+
 def cmd_sources(args):
     for source in call("GET", "/v1/sources", timeout=30)["sources"]:
         print("%-30s %s" % ((source.get("name") or "?")[:30], source.get("url")))
@@ -663,6 +795,11 @@ def main():
     p.add_argument("--name")
     p.add_argument("--default", action="store_true")
     p.set_defaults(func=cmd_cert_add)
+
+    p = sub.add_parser("pairing", help="make a fresh idevice pairing file over USB and put it on the device")
+    p.add_argument("file", nargs="?", help="send this pairingFile.plist instead of making one")
+    p.add_argument("--udid", help="which attached device, when more than one is plugged in")
+    p.set_defaults(func=cmd_pairing)
 
     sub.add_parser("sources", help="list sources").set_defaults(func=cmd_sources)
 

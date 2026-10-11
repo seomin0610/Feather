@@ -55,6 +55,8 @@ feather export MyApp -o signed.ipa
 feather rm MyApp
 feather certs
 feather cert-add cert.p12 cert.mobileprovision --password hunter2 --default
+feather pairing                                # fresh idevice pairing file, made over USB
+feather pairing pairingFile.plist              # or send one you already have
 feather sources
 feather source-add https://example.com/repo.json
 ```
@@ -68,6 +70,11 @@ of the same kind: imported ones after the import, signed ones after signing. It 
 Transfers show a bar, signing and packaging show elapsed time (the device reports no percentage for
 those), and installs show installd's own progress, polled from `/v1/apps/{uuid}/progress`. All of it
 goes to stderr, so `feather apps | grep ...` stays clean.
+
+`pairing` with no file builds the one the idevice installation method needs, with the device on the
+cable: this computer's lockdown record (read from usbmuxd, so the device must already trust it) plus a
+fresh RP pairing for iOS 17.4+. The RP half comes from jkcoxson's `idevice-tools`, taken from `PATH`
+or downloaded once to `~/.cache/feather-cli` and checked against a pinned SHA-256.
 
 `install` hands the app to Feather's own install sheet, so it obeys whichever installation method is
 set in Settings (server or idevice) and needs Feather to be in the foreground. If it is in the
@@ -96,6 +103,7 @@ JSON over HTTP, everything under `/v1`. Every route needs `Authorization: Bearer
 | GET | `/v1/apps/{uuid}/progress` | | `{identifier, progress}` while installd works |
 | GET | `/v1/certificates` | | `{certificates: [...], selected: n}` |
 | POST | `/v1/certificates` | `{p12, provision, password, name, makeDefault}` (base64) | the certificate list |
+| POST | `/v1/pairing` | `{pairingFile}` (base64) | `{ok: true}` |
 | GET | `/v1/sources` | | `{sources: [...]}` |
 | POST | `/v1/sources` | `{url}` | `{ok: true}` |
 

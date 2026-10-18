@@ -76,8 +76,13 @@ extension AppIconView {
 		icon: AppIconView.AltIcon
 	) -> some View {
 		Button {
-			UIApplication.shared.setAlternateIconName(icon.key) { _ in
-				currentIcon = UIApplication.shared.alternateIconName
+			UIApplication.shared.setAlternateIconName(icon.key) { error in
+				DispatchQueue.main.async {
+					currentIcon = UIApplication.shared.alternateIconName
+					if let error {
+						UIAlertController.showAlertWithOk(title: .localized("Error"), message: error.localizedDescription)
+					}
+				}
 			}
 		} label: {
 			HStack(spacing: 18) {

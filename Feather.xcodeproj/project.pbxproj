@@ -62,19 +62,19 @@
 			);
 			target = 3379C1B82DA869A1004372DA /* Feather */;
 		};
-		F00D0000000000000000000F /* Exceptions for "FeatherWidget" folder in "Feather" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				UpdateWidgetSnapshot.swift,
-			);
-			target = 3379C1B82DA869A1004372DA /* Feather */;
-		};
 		F00D0000000000000000000E /* Exceptions for "FeatherWidget" folder in "FeatherWidget" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
 			target = F00D00000000000000000014 /* FeatherWidget */;
+		};
+		F00D0000000000000000000F /* Exceptions for "FeatherWidget" folder in "Feather" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				UpdateWidgetSnapshot.swift,
+			);
+			target = 3379C1B82DA869A1004372DA /* Feather */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -461,6 +461,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = "Feather/Supporting Files/Feather.entitlements";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = "Feather/Supporting Files/Feather-Simulator.entitlements";
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Manual;
 				COMPRESS_PNG_FILES = NO;
@@ -526,6 +527,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = "Feather/Supporting Files/Feather.entitlements";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = "Feather/Supporting Files/Feather-Simulator.entitlements";
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Manual;
 				COMPRESS_PNG_FILES = NO;
@@ -584,6 +586,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 570920BD2F98A4F0008C4A83 /* Feather.xcconfig */;
 			buildSettings = {
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = "Feather/Supporting Files/Feather-Simulator.entitlements";
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
@@ -616,6 +619,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 570920BD2F98A4F0008C4A83 /* Feather.xcconfig */;
 			buildSettings = {
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = "Feather/Supporting Files/Feather-Simulator.entitlements";
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;

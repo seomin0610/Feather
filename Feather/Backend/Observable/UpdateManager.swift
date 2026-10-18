@@ -208,7 +208,8 @@ final class UpdateManager: ObservableObject {
 			apps: apps.enumerated().map { index, app in
 				UpdateWidgetSnapshot.App(name: app.name, icon: index < 3 ? _widgetIcon(for: app.bundleURL) : nil)
 			},
-			checkedAt: lastCheckedDate ?? Date()
+			checkedAt: lastCheckedDate ?? Date(),
+			tint: UserDefaults.standard.string(forKey: "Feather.userTintColor")
 		).save()
 	}
 
@@ -217,8 +218,8 @@ final class UpdateManager: ObservableObject {
 
 		let format = UIGraphicsImageRendererFormat()
 		format.scale = 1
-		return UIGraphicsImageRenderer(size: CGSize(width: 42, height: 42), format: format).pngData { _ in
-			icon.draw(in: CGRect(x: 0, y: 0, width: 42, height: 42))
+		return UIGraphicsImageRenderer(size: CGSize(width: 132, height: 132), format: format).pngData { _ in
+			icon.draw(in: CGRect(x: 0, y: 0, width: 132, height: 132))
 		}
 	}
 

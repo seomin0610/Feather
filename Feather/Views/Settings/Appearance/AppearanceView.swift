@@ -94,5 +94,8 @@ struct AppearanceView: View {
 				UIApplication.topViewController()?.view.window?.overrideUserInterfaceStyle = style
 			}
 		}
+		.onChange(of: _selectedColorHex) { value in
+			UpdateWidgetSnapshot.saveTint(value)
+		}
 	}
 }

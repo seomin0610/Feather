@@ -17,6 +17,8 @@ struct UpdateWidgetSnapshot: Codable {
 
 	var apps: [App]
 	var checkedAt: Date
+	/// The app's tint as a hex string, the widget can't read the app's user defaults.
+	var tint: String?
 
 	private static let _query: [String: Any] = [
 		kSecClass as String: kSecClassGenericPassword,
@@ -37,6 +39,13 @@ struct UpdateWidgetSnapshot: Codable {
 		}
 
 		return try? JSONDecoder().decode(UpdateWidgetSnapshot.self, from: data)
+	}
+
+	/// Swaps the tint on the saved snapshot, there is nothing to recolor before the first check.
+	static func saveTint(_ hex: String) {
+		guard var snapshot = load() else { return }
+		snapshot.tint = hex
+		snapshot.save()
 	}
 
 	func save() {

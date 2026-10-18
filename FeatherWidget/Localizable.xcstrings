@@ -12,6 +12,35 @@
         }
       }
     },
+    "%lld updates" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld update"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld updates"
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "업데이트 %lld개"
+          }
+        }
+      }
+    },
     "Open Feather to check for updates" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -34,7 +63,7 @@
         }
       }
     },
-    "Up to Date" : {
+    "Up to date" : {
       "extractionState" : "manual",
       "localizations" : {
         "ko" : {
@@ -52,39 +81,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "업데이트"
-          }
-        }
-      }
-    },
-    "Updates Available" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "업데이트 가능"
-          }
-        }
-      }
-    },
-    "app" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "개"
-          }
-        }
-      }
-    },
-    "apps" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "개"
           }
         }
       }

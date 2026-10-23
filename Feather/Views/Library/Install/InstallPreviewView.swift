@@ -20,6 +20,7 @@ struct InstallPreviewView: View {
 	@AppStorage("Feather.serverMethod") private var _serverMethod: Int = 0
 	@State private var _isWebviewPresenting = false
 	@State private var progressTask: Task<Void, Never>?
+	@State private var _stallTask: Task<Void, Never>?
 	
 	var app: AppInfoPresentable
 	private var _taskId: String { "FeatherInstall_\(app.uuid ?? "")" }
@@ -73,6 +74,12 @@ struct InstallPreviewView: View {
 			}
 			
 			if _installationMethod == 0 {
+				_watchForStall(newStatus)
+				
+				if case .broken(let error) = newStatus {
+					_showFailure(error.localizedDescription)
+				}
+				
 				if case .ready = newStatus {
 					if _serverMethod == 0 {
 						UIApplication.shared.open(URL(string: installer.iTunesLink)!)
@@ -122,6 +129,8 @@ struct InstallPreviewView: View {
 			LiveTask.stop(_taskId)
 			progressTask?.cancel()
 			progressTask = nil
+			_stallTask?.cancel()
+			_stallTask = nil
 			
 			#if !targetEnvironment(macCatalyst)
 			BackgroundAudioManager.shared.stop("install")
@@ -229,6 +238,45 @@ struct InstallPreviewView: View {
 				}
 			}
 		}
+	}
+	
+	private func _watchForStall(_ status: InstallerStatusViewModel.InstallerStatus) {
+		_stallTask?.cancel()
+		_stallTask = nil
+		
+		let message: String
+		switch status {
+		case .ready:
+			message = .localized("iOS didn't request the app. The install prompt may have been cancelled, or the device couldn't reach the install server. Try updating the SSL certificates in Settings › Server & SSL.")
+		case .sendingManifest:
+			message = .localized("iOS read the install manifest but never downloaded the app. The install prompt may have been cancelled, or the app's signature isn't valid for this device.")
+		default:
+			return
+		}
+		
+		_stallTask = Task { @MainActor in
+			// the install prompt and the Safari sheet keep the user away from this screen, so only count time spent back here
+			var activeSeconds = 0
+			while activeSeconds < 15 {
+				try? await Task.sleep(nanoseconds: 1_000_000_000)
+				if Task.isCancelled { return }
+				if UIApplication.shared.applicationState == .active && !_isWebviewPresenting {
+					activeSeconds += 1
+				}
+			}
+			
+			_showFailure(message)
+		}
+	}
+	
+	private func _showFailure(_ message: String) {
+		UIAlertController.showAlertWithOk(
+			title: .localized("Install"),
+			message: message,
+			action: {
+				dismiss()
+			}
+		)
 	}
 	
 	/// Uploads the package to the signer server, opens the OTA install link, then leaves the app so it can be replaced.

@@ -19612,6 +19612,40 @@
           }
         }
       }
+    },
+    "iOS didn't request the app. The install prompt may have been cancelled, or the device couldn't reach the install server. Try updating the SSL certificates in Settings › Server & SSL." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS didn't request the app. The install prompt may have been cancelled, or the device couldn't reach the install server. Try updating the SSL certificates in Settings › Server & SSL."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS가 앱을 요청하지 않았습니다. 설치 창이 취소되었거나 기기가 설치 서버에 연결하지 못했을 수 있습니다. 설정 › 서버 및 SSL에서 SSL 인증서를 업데이트해 보세요."
+          }
+        }
+      }
+    },
+    "iOS read the install manifest but never downloaded the app. The install prompt may have been cancelled, or the app's signature isn't valid for this device." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS read the install manifest but never downloaded the app. The install prompt may have been cancelled, or the app's signature isn't valid for this device."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS가 설치 매니페스트는 읽었지만 앱을 내려받지 않았습니다. 설치 창이 취소되었거나 앱 서명이 이 기기에서 유효하지 않을 수 있습니다."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

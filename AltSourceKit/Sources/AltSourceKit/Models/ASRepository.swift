@@ -400,6 +400,7 @@ extension ASRepository {
 			public var downloadURL: URL?
 			public var size: UInt?
 			public var minOSVersion: OSVersion?
+			public var sha256: String?
 
 			public init(from decoder: any Decoder) throws {
 				let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -429,6 +430,10 @@ extension ASRepository {
 					OSVersion.self,
 					forKey: .minOSVersion
 				)
+				self.sha256 = try? container.decodeIfPresent(
+					String.self,
+					forKey: .sha256
+				)
 			}
 
 			static public func < (lhs: Self, rhs: Self) -> Bool {
@@ -439,7 +444,7 @@ extension ASRepository {
 			public enum CodingKeys: String, CodingKey {
 				case version
 				case build = "buildVersion"
-				case date, localizedDescription, downloadURL, size, minOSVersion
+				case date, localizedDescription, downloadURL, size, minOSVersion, sha256
 			}
 		}
 	}

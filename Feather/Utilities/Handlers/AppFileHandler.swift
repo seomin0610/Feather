@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CryptoKit
 import Zip
 import SwiftUI
 
@@ -89,6 +90,93 @@ final class AppFileHandler: NSObject, @unchecked Sendable {
 		}
 	}
 	
+	func verify() async throws {
+		guard
+			let payloadURL = uniqueWorkDirPayload,
+			let appURL = _fileManager.getPath(in: payloadURL, for: "app"),
+			let bundle = Bundle(url: appURL)
+		else {
+			return
+		}
+
+		let info = bundle.infoDictionary ?? [:]
+		let defaults = UserDefaults.standard
+		var issues: [VerificationIssue] = []
+
+		if let provenance = _sourceProvenance, defaults.object(forKey: "Feather.verification.security") as? Bool ?? true {
+			if let identifier = bundle.bundleIdentifier, identifier != provenance.sourceAppIdentifier {
+				issues.append(VerificationIssue(kind: .bundleID, expected: provenance.sourceAppIdentifier, actual: identifier))
+			}
+
+			if
+				let expectedHash = provenance.sourceAppSHA256,
+				let hash = try? _sha256(of: _ipa),
+				hash.caseInsensitiveCompare(expectedHash) != .orderedSame
+			{
+				issues.append(VerificationIssue(kind: .hash))
+			}
+
+			if
+				let expectedVersion = provenance.sourceAppVersion,
+				let version = info["CFBundleShortVersionString"] as? String,
+				version != expectedVersion
+			{
+				issues.append(VerificationIssue(kind: .version, expected: expectedVersion, actual: version))
+			}
+
+			if
+				let expectedBuild = provenance.sourceAppBuildVersion,
+				let build = info["CFBundleVersion"] as? String,
+				build != expectedBuild
+			{
+				issues.append(VerificationIssue(kind: .buildVersion, expected: expectedBuild, actual: build))
+			}
+		}
+
+		#if !targetEnvironment(macCatalyst)
+		let system = ProcessInfo.processInfo.operatingSystemVersion
+		let systemVersion = "\(system.majorVersion).\(system.minorVersion).\(system.patchVersion)"
+		if
+			defaults.object(forKey: "Feather.verification.compatibility") as? Bool ?? true,
+			let minimumVersion = info["MinimumOSVersion"] as? String,
+			minimumVersion.compare(systemVersion, options: .numeric) == .orderedDescending
+		{
+			issues.append(VerificationIssue(kind: .minimumOS, expected: "iOS \(minimumVersion)", actual: "iOS \(systemVersion)"))
+		}
+		#endif
+
+		guard !issues.isEmpty else { return }
+
+		let appName = _sourceProvenance?.sourceAppName ?? bundle.name
+		let sourceName = _sourceProvenance.map { $0.sourceRepositoryName ?? $0.sourceRepositoryURL.host ?? $0.sourceRepositoryURL.absoluteString }
+		let appIcon = iconTest(appURL)
+
+		// nobody to ask, so don't let it through
+		guard
+			let presenter = await MainActor.run(body: { UIApplication.topViewController() }),
+			await VerificationWarningView.present(
+				on: presenter,
+				appName: appName,
+				appIcon: appIcon,
+				sourceName: sourceName,
+				issues: issues
+			)
+		else {
+			throw CancellationError()
+		}
+	}
+
+	private func _sha256(of url: URL) throws -> String {
+		let handle = try FileHandle(forReadingFrom: url)
+		defer { try? handle.close() }
+
+		var hasher = SHA256()
+		while let chunk = try handle.read(upToCount: 1 << 20), !chunk.isEmpty {
+			hasher.update(data: chunk)
+		}
+		return hasher.finalize().map { String(format: "%02x", $0) }.joined()
+	}
+
 	func move() async throws {
 		guard let payloadURL = uniqueWorkDirPayload else {
 			throw ImportedFileHandlerError.payloadNotFound

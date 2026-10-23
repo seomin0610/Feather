@@ -19646,6 +19646,346 @@
           }
         }
       }
+    },
+    "A different version than the source lists was downloaded. The source may be poorly maintained, or the file may have been swapped." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A different version than the source lists was downloaded. The source may be poorly maintained, or the file may have been swapped."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "소스에 적힌 것과 다른 버전이 받아졌습니다. 소스 관리가 잘못됐거나 파일이 바꿔치기되었을 수 있습니다."
+          }
+        }
+      }
+    },
+    "Add Anyway" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add Anyway"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "그래도 추가"
+          }
+        }
+      }
+    },
+    "App" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "앱"
+          }
+        }
+      }
+    },
+    "Before adding an app, Feather checks that its bundle ID, version and file hash match what the source lists, and that it supports this version of iOS." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Before adding an app, Feather checks that its bundle ID, version and file hash match what the source lists, and that it supports this version of iOS."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "앱을 추가하기 전에 번들 ID, 버전, 파일 해시가 소스에 표기된 내용과 같은지, 이 iOS 버전을 지원하는지 확인합니다."
+          }
+        }
+      }
+    },
+    "Build version doesn't match" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Build version doesn't match"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "빌드 버전이 다릅니다"
+          }
+        }
+      }
+    },
+    "Bundle ID doesn't match" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bundle ID doesn't match"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "번들 ID가 다릅니다"
+          }
+        }
+      }
+    },
+    "Compatibility Warning" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compatibility Warning"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "호환성 경고"
+          }
+        }
+      }
+    },
+    "Downloaded from %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Downloaded from %@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@에서 받음"
+          }
+        }
+      }
+    },
+    "File hash doesn't match" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "File hash doesn't match"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "파일 해시가 다릅니다"
+          }
+        }
+      }
+    },
+    "May not run on this device" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "May not run on this device"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 기기에서 실행되지 않을 수 있습니다"
+          }
+        }
+      }
+    },
+    "Only add it if you trust this source." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only add it if you trust this source."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 소스를 신뢰하는 경우에만 추가하세요."
+          }
+        }
+      }
+    },
+    "Required" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Required"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "필요"
+          }
+        }
+      }
+    },
+    "Security Warning" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Security Warning"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "보안 경고"
+          }
+        }
+      }
+    },
+    "Show Compatibility Warnings" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Compatibility Warnings"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "호환성 경고 표시"
+          }
+        }
+      }
+    },
+    "Show Security Warnings" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Security Warnings"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "보안 경고 표시"
+          }
+        }
+      }
+    },
+    "The version number matches, but it's a different build. The file may have been swapped." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The version number matches, but it's a different build. The file may have been swapped."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "버전 번호는 같아도 다른 빌드입니다. 파일이 바꿔치기되었을 수 있습니다."
+          }
+        }
+      }
+    },
+    "This Device" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This Device"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 기기"
+          }
+        }
+      }
+    },
+    "This isn't the app the source describes. It may be a fake that only copies the name and icon." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This isn't the app the source describes. It may be a fake that only copies the name and icon."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "소스가 소개한 앱과 다른 앱입니다. 이름과 아이콘만 흉내 낸 가짜 앱일 수 있습니다."
+          }
+        }
+      }
+    },
+    "This isn't the file the source published. It may have changed during download, or someone may have added malicious code." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This isn't the file the source published. It may have changed during download, or someone may have added malicious code."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "소스가 올린 파일과 다릅니다. 받는 도중 바뀌었거나 누군가 악성 코드를 넣었을 수 있습니다."
+          }
+        }
+      }
+    },
+    "Version doesn't match" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version doesn't match"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "버전이 다릅니다"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

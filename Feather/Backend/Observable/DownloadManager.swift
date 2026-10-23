@@ -265,6 +265,7 @@ extension DownloadManager: URLSessionDownloadDelegate {
 			// already gone means the user cancelled it
 			guard self.getDownload(by: download.id) != nil else { return }
 			self.cancelDownload(download)
+			guard !(error is CancellationError) else { return }
 			
 			UINotificationFeedbackGenerator().notificationOccurred(.error)
 			guard let presenter = UIApplication.topViewController() else { return }

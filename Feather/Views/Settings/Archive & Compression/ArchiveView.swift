@@ -16,6 +16,8 @@ struct ArchiveView: View {
 	@AppStorage("Feather.replaceAppsOnUpdate") private var _replaceAppsOnUpdate: Bool = true
 	@AppStorage("Feather.replaceAppsOnUpdate.sameVersion") private var _replaceSameVersion: Bool = true
 	@AppStorage("Feather.replaceAppsOnUpdate.signed") private var _replaceSigned: Bool = true
+	@AppStorage("Feather.verification.security") private var _showSecurityWarnings: Bool = true
+	@AppStorage("Feather.verification.compatibility") private var _showCompatibilityWarnings: Bool = true
 	
 	// MARK: Body
 	var body: some View {
@@ -43,6 +45,13 @@ struct ArchiveView: View {
 				}
 			} footer: {
 				Text(.localized("When a new version of an app is added to your library, older copies with the same bundle identifier will be deleted."))
+			}
+
+			Section {
+				Toggle(.localized("Show Security Warnings"), systemImage: "exclamationmark.shield", isOn: $_showSecurityWarnings)
+				Toggle(.localized("Show Compatibility Warnings"), systemImage: "iphone", isOn: $_showCompatibilityWarnings)
+			} footer: {
+				Text(.localized("Before adding an app, Feather checks that its bundle ID, version and file hash match what the source lists, and that it supports this version of iOS."))
 			}
 		}
 	}

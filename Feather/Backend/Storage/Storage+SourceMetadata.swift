@@ -16,6 +16,8 @@ struct SourceAppProvenance: Equatable {
 	let sourceAppIdentifier: String
 	let sourceAppName: String?
 	let sourceAppVersion: String?
+	let sourceAppBuildVersion: String?
+	let sourceAppSHA256: String?
 	let sourceAppVersionDate: Date?
 	let sourceAppDownloadURL: URL?
 	
@@ -63,6 +65,10 @@ extension SourceAppProvenance {
 }
 
 extension Storage {
+		// only trust the build and hash when they belong to the version being downloaded
+		let sourceVersion = version ?? app.currentAppVersion.flatMap { $0.version == appVersion ? $0 : nil }
+		self.sourceAppBuildVersion = sourceVersion?.build
+		self.sourceAppSHA256 = sourceVersion?.sha256
 	func sourceMetadata(for appUUID: String) -> AppSourceMetadata? {
 		let request: NSFetchRequest<AppSourceMetadata> = AppSourceMetadata.fetchRequest()
 		request.fetchLimit = 1

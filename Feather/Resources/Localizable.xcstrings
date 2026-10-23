@@ -20105,6 +20105,91 @@
           }
         }
       }
+    },
+    "Export Database" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export Database"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "데이터베이스 내보내기"
+          }
+        }
+      }
+    },
+    "Import Database" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import Database"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "데이터베이스 불러오기"
+          }
+        }
+      }
+    },
+    "The current apps, certificates and sources will be replaced with the imported ones and the app will restart." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The current apps, certificates and sources will be replaced with the imported ones and the app will restart."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지금 있는 앱, 인증서, 소스 목록을 불러온 것으로 바꾸고 앱을 다시 시작합니다."
+          }
+        }
+      }
+    },
+    "The database holds your lists of apps, certificates and sources, not the files themselves. Importing replaces the current database and restarts the app." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The database holds your lists of apps, certificates and sources, not the files themselves. Importing replaces the current database and restarts the app."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "데이터베이스에는 앱, 인증서, 소스 목록만 들어 있고 파일 자체는 들어 있지 않습니다. 불러오면 지금 데이터베이스를 바꾸고 앱을 다시 시작합니다."
+          }
+        }
+      }
+    },
+    "This file isn't a Feather database." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This file isn't a Feather database."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feather 데이터베이스 파일이 아닙니다."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

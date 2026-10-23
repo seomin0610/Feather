@@ -22,7 +22,7 @@ final class Storage: ObservableObject {
 			container.persistentStoreDescriptions.first?.url =
 				URL(fileURLWithPath: "/dev/null")
 		} else {
-			_migrateFeatherPlusStoreIfPending()
+			_replaceStoreIfPending()
 		}
 		
 		container.persistentStoreDescriptions.first?.shouldMigrateStoreAutomatically = true
@@ -44,34 +44,81 @@ final class Storage: ObservableObject {
 		FileManager.default.fileExists(atPath: featherPlusStoreURL.path)
 	}
 	
-	/// Runs before the store is loaded, so no live objects point at the replaced store.
-	private func _migrateFeatherPlusStoreIfPending() {
-		let defaults = UserDefaults.standard
-		guard
-			defaults.bool(forKey: Self.pendingFeatherPlusMigrationKey),
-			Self.hasFeatherPlusData,
-			let destination = container.persistentStoreDescriptions.first?.url
-		else {
-			return
+	// MARK: Import / Export
+	static let pendingImportStoreURL = NSPersistentContainer.defaultDirectoryURL().appendingPathComponent("FeatherImport.sqlite")
+
+	func exportDatabase() throws -> URL {
+		if context.hasChanges {
+			try context.save()
 		}
-		
-		defaults.removeObject(forKey: Self.pendingFeatherPlusMigrationKey)
-		
+
+		guard let storeURL = container.persistentStoreDescriptions.first?.url else {
+			throw CocoaError(.fileNoSuchFile)
+		}
+
+		let date = Date().formatted(Date.ISO8601FormatStyle(timeZone: .current).year().month().day())
+		let url = FileManager.default.temporaryDirectory.appendingPathComponent("Feather-\(date).sqlite")
+		_removeStoreFiles(at: url)
+
+		try container.persistentStoreCoordinator.replacePersistentStore(
+			at: url,
+			destinationOptions: [NSSQLitePragmasOption: ["journal_mode": "DELETE"]],
+			withPersistentStoreFrom: storeURL,
+			sourceOptions: nil,
+			ofType: NSSQLiteStoreType
+		)
+		return url
+	}
+
+	static func validateDatabase(at url: URL) throws {
+		let metadata = try NSPersistentStoreCoordinator.metadataForPersistentStore(ofType: NSSQLiteStoreType, at: url)
+		guard
+			let hashes = metadata[NSStoreModelVersionHashesKey] as? [String: Any],
+			["Imported", "Signed", "CertificatePair"].allSatisfy({ hashes[$0] != nil })
+		else {
+			throw CocoaError(.fileReadCorruptFile)
+		}
+	}
+
+	static func stageDatabaseImport(from url: URL) throws {
+		let fileManager = FileManager.default
+		try fileManager.createDirectoryIfNeeded(at: pendingImportStoreURL.deletingLastPathComponent())
+		try fileManager.removeFileIfNeeded(at: pendingImportStoreURL)
+		try fileManager.copyItem(at: url, to: pendingImportStoreURL)
+	}
+
+	/// Runs before the store is loaded, so no live objects point at the replaced store.
+	private func _replaceStoreIfPending() {
+		let defaults = UserDefaults.standard
+
+		if FileManager.default.fileExists(atPath: Self.pendingImportStoreURL.path) {
+			_replaceStore(with: Self.pendingImportStoreURL)
+		} else if defaults.bool(forKey: Self.pendingFeatherPlusMigrationKey), Self.hasFeatherPlusData {
+			defaults.removeObject(forKey: Self.pendingFeatherPlusMigrationKey)
+			_replaceStore(with: Self.featherPlusStoreURL)
+		}
+	}
+
+	private func _replaceStore(with source: URL) {
+		guard let destination = container.persistentStoreDescriptions.first?.url else { return }
+		defer { _removeStoreFiles(at: source) }
+
 		do {
 			try FileManager.default.createDirectoryIfNeeded(at: destination.deletingLastPathComponent())
 			try container.persistentStoreCoordinator.replacePersistentStore(
 				at: destination,
 				destinationOptions: nil,
-				withPersistentStoreFrom: Self.featherPlusStoreURL,
+				withPersistentStoreFrom: source,
 				sourceOptions: nil,
 				ofType: NSSQLiteStoreType
 			)
 		} catch {
-			print("Failed to migrate FeatherPlus database: \(error)")
-			return
+			print("Failed to replace database from \(source.lastPathComponent): \(error)")
 		}
-		
-		let base = Self.featherPlusStoreURL.deletingPathExtension()
+	}
+
+	private func _removeStoreFiles(at url: URL) {
+		let base = url.deletingPathExtension()
 		for ext in ["sqlite", "sqlite-wal", "sqlite-shm"] {
 			try? FileManager.default.removeItem(at: base.appendingPathExtension(ext))
 		}

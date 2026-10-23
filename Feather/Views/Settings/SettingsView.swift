@@ -15,6 +15,7 @@ import IDeviceSwift
 struct SettingsView: View {
 	@AppStorage("feather.selectedCert") private var _storedSelectedCert: Int = 0
 	@State private var _currentIcon: String? = UIApplication.shared.alternateIconName
+	@State private var _isImportingDatabasePresenting = false
 	
 	// MARK: Fetch
 	@FetchRequest(
@@ -93,18 +94,17 @@ struct SettingsView: View {
 					Text(.localized("Reset the applications sources, certificates, apps, and general contents."))
 				}
 				
-				if Storage.hasFeatherPlusData {
-					Section {
-						Button(.localized("Migrate from FeatherPlus"), systemImage: "arrow.down.doc") {
-							ResetView.resetAlert(
-								title: .localized("Migrate from FeatherPlus"),
-								message: .localized("FeatherPlus data was found. Migrating replaces the current apps, certificates and sources with it and restarts the app.")
-							) {
-								UserDefaults.standard.set(true, forKey: Storage.pendingFeatherPlusMigrationKey)
-							}
-						}
+				_database()
+			}
+			.sheet(isPresented: $_isImportingDatabasePresenting) {
+				FileImporterRepresentableView(
+					allowedContentTypes: [.data],
+					onDocumentsPicked: { urls in
+						guard let url = urls.first else { return }
+						_importDatabase(from: url)
 					}
-				}
+				)
+				.ignoresSafeArea()
 			}
 		}
 	}
@@ -134,6 +134,60 @@ extension SettingsView {
 		}
 	}
     
+	@ViewBuilder
+	private func _database() -> some View {
+		Section {
+			Button(.localized("Export Database"), systemImage: "square.and.arrow.up") {
+				do {
+					UIActivityViewController.show(activityItems: [try Storage.shared.exportDatabase()])
+				} catch {
+					UIAlertController.showAlertWithOk(title: .localized("Error"), message: error.localizedDescription)
+				}
+			}
+			Button(.localized("Import Database"), systemImage: "square.and.arrow.down") {
+				_isImportingDatabasePresenting = true
+			}
+
+			if Storage.hasFeatherPlusData {
+				Button(.localized("Migrate from FeatherPlus"), systemImage: "arrow.down.doc") {
+					ResetView.resetAlert(
+						title: .localized("Migrate from FeatherPlus"),
+						message: .localized("FeatherPlus data was found. Migrating replaces the current apps, certificates and sources with it and restarts the app.")
+					) {
+						UserDefaults.standard.set(true, forKey: Storage.pendingFeatherPlusMigrationKey)
+					}
+				}
+			}
+		} footer: {
+			Text(.localized("The database holds your lists of apps, certificates and sources, not the files themselves. Importing replaces the current database and restarts the app."))
+		}
+	}
+
+	private func _importDatabase(from url: URL) {
+		do {
+			try Storage.validateDatabase(at: url)
+		} catch {
+			UIAlertController.showAlertWithOk(
+				title: .localized("Import Database"),
+				message: .localized("This file isn't a Feather database.")
+			)
+			return
+		}
+
+		DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+			ResetView.resetAlert(
+				title: .localized("Import Database"),
+				message: .localized("The current apps, certificates and sources will be replaced with the imported ones and the app will restart.")
+			) {
+				do {
+					try Storage.stageDatabaseImport(from: url)
+				} catch {
+					print("Failed to stage database import: \(error)")
+				}
+			}
+		}
+	}
+
 	@ViewBuilder
 	private func _directories() -> some View {
 		NBSection(.localized("Misc")) {

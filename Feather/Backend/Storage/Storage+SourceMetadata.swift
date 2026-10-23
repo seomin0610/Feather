@@ -31,6 +31,12 @@ struct SourceAppProvenance: Equatable {
 	}
 }
 
+struct AppSourceInfo {
+	let name: String
+	let url: URL
+	let downloadURL: URL?
+}
+
 enum SourceLinkedAppKind: String {
 	case imported
 	case signed
@@ -59,16 +65,16 @@ extension SourceAppProvenance {
 		let appVersionDate = version?.date?.date ?? app.currentDate?.date
 		let appDownloadURL = version?.downloadURL ?? app.currentDownloadUrl
 		self.sourceAppVersion = appVersion
+		// only trust the build and hash when they belong to the version being downloaded
+		let sourceVersion = version ?? app.currentAppVersion.flatMap { $0.version == appVersion ? $0 : nil }
+		self.sourceAppBuildVersion = sourceVersion?.build
+		self.sourceAppSHA256 = sourceVersion?.sha256
 		self.sourceAppVersionDate = appVersionDate
 		self.sourceAppDownloadURL = appDownloadURL
 	}
 }
 
 extension Storage {
-		// only trust the build and hash when they belong to the version being downloaded
-		let sourceVersion = version ?? app.currentAppVersion.flatMap { $0.version == appVersion ? $0 : nil }
-		self.sourceAppBuildVersion = sourceVersion?.build
-		self.sourceAppSHA256 = sourceVersion?.sha256
 	func sourceMetadata(for appUUID: String) -> AppSourceMetadata? {
 		let request: NSFetchRequest<AppSourceMetadata> = AppSourceMetadata.fetchRequest()
 		request.fetchLimit = 1
@@ -85,6 +91,40 @@ extension Storage {
 	func sourceMetadata(for app: AppInfoPresentable) -> AppSourceMetadata? {
 		guard let uuid = app.uuid else { return nil }
 		return sourceMetadata(for: uuid)
+	}
+
+	func sourceInfo(for app: AppInfoPresentable) -> AppSourceInfo? {
+		let metadata = sourceMetadata(for: app) ?? _unsignedCopyMetadata(for: app)
+		guard let url = metadata?.sourceRepositoryURL ?? app.source else { return nil }
+
+		return AppSourceInfo(
+			name: metadata?.sourceRepositoryName ?? _source(matching: url)?.name ?? url.host ?? url.absoluteString,
+			url: url,
+			downloadURL: metadata?.sourceAppDownloadURL
+		)
+	}
+
+	private func _unsignedCopyMetadata(for app: AppInfoPresentable) -> AppSourceMetadata? {
+		guard
+			app.isSigned,
+			let identifier = app.identifier,
+			let version = app.version
+		else {
+			return nil
+		}
+
+		let request: NSFetchRequest<Imported> = Imported.fetchRequest()
+		request.predicate = NSPredicate(format: "identifier == %@ AND version == %@", identifier, version)
+		return ((try? context.fetch(request)) ?? []).lazy.compactMap { self.sourceMetadata(for: $0) }.first
+	}
+
+	private func _source(matching url: URL) -> AltSource? {
+		func normalized(_ url: URL) -> String {
+			let string = url.absoluteString.lowercased()
+			return string.hasSuffix("/") ? String(string.dropLast()) : string
+		}
+
+		return getSources().first { $0.sourceURL.map(normalized) == normalized(url) }
 	}
 	
 	func getSourceMetadata() -> [AppSourceMetadata] {

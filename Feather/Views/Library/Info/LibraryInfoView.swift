@@ -12,6 +12,7 @@ import Zsign
 // MARK: - View
 struct LibraryInfoView: View {
 	var app: AppInfoPresentable
+	@State private var _isDownloadURLShown = false
 	
 	// MARK: Body
 	var body: some View {
@@ -23,6 +24,7 @@ struct LibraryInfoView: View {
 				}
 				
 				_infoSection(for: app)
+				_sourceSection(for: app)
 				_certSection(for: app)
 				_bundleSection(for: app)
 				_executableSection(for: app)
@@ -71,6 +73,35 @@ extension LibraryInfoView {
 		}
 	}
 	
+	@ViewBuilder
+	private func _sourceSection(for app: AppInfoPresentable) -> some View {
+		NBSection(.localized("Source")) {
+			if let source = Storage.shared.sourceInfo(for: app) {
+				_infoCell(.localized("Name"), desc: source.name)
+				_infoCell(.localized("URL"), desc: source.url.absoluteString)
+
+				if let downloadURL = source.downloadURL {
+					if _isDownloadURLShown {
+						_infoCell(.localized("Download URL"), desc: downloadURL.absoluteString)
+					} else {
+						Button {
+							withAnimation { _isDownloadURLShown = true }
+						} label: {
+							LabeledContent(.localized("Download URL")) {
+								Text(.localized("Show"))
+									.foregroundStyle(.tint)
+							}
+							.foregroundStyle(.primary)
+						}
+					}
+				}
+			} else {
+				Text(.localized("This app wasn't downloaded from a source."))
+					.foregroundStyle(.secondary)
+			}
+		}
+	}
+
 	@ViewBuilder
 	private func _certSection(for app: AppInfoPresentable) -> some View {
 		if let cert = Storage.shared.getCertificate(from: app) {

@@ -157,31 +157,34 @@ final class SigningHandler: NSObject {
 		}
 
 		let bundle = Bundle(url: appUrl)
+		let uuid = _uuid
+		let sourceApp = _app
+		let certificate = _options.signingOption != .default ? nil : appCertificate
+		let (name, identifier, version, icon) = (bundle?.name, bundle?.bundleIdentifier, bundle?.version, bundle?.iconFileName)
 
-		await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-
+		// the context lives on the main queue, writing from here could drop the source metadata
+		await MainActor.run {
 			Storage.shared.addSigned(
-				uuid: _uuid,
-				source: _app.source,
-				certificate: _options.signingOption != .default ? nil : appCertificate,
-				appName: bundle?.name,
-				appIdentifier: bundle?.bundleIdentifier,
-				appVersion: bundle?.version,
-				appIcon: bundle?.iconFileName
+				uuid: uuid,
+				source: sourceApp.source,
+				certificate: certificate,
+				appName: name,
+				appIdentifier: identifier,
+				appVersion: version,
+				appIcon: icon
 			) { _ in
-				Logger.signing.info("[\(self._uuid)] Added to database")
-				continuation.resume()
+				Logger.signing.info("[\(uuid)] Added to database")
 			}
+
+			Storage.shared.copySourceMetadata(
+				from: sourceApp.uuid,
+				to: uuid,
+				kind: .signed
+			)
 		}
-		
-		Storage.shared.copySourceMetadata(
-			from: _app.uuid,
-			to: _uuid,
-			kind: .signed
-		)
 
 		// after copying metadata, since the source app itself may be an outdated signed app
-		Storage.shared.deleteOutdatedApps(
+		await Storage.shared.deleteOutdatedApps(
 			identifier: bundle?.bundleIdentifier,
 			version: bundle?.version,
 			excluding: _uuid,

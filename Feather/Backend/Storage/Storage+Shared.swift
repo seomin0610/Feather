@@ -6,6 +6,7 @@
 //
 
 import CoreData
+import UIKit
 
 // MARK: - Class extension: Apps (Shared)
 extension Storage {
@@ -39,14 +40,18 @@ extension Storage {
 		}
 	}
 	
+	@MainActor private static var _isAskingToReplace = false
+
 	/// Deletes older apps of the same kind sharing a bundle identifier, when "Replace Apps on Update" is enabled.
-	func deleteOutdatedApps(identifier: String?, version: String?, excluding uuid: String, signed: Bool) {
+	@MainActor
+	func deleteOutdatedApps(identifier: String?, version: String?, excluding uuid: String, signed: Bool) async {
 		let defaults = UserDefaults.standard
+		let replaceApps = defaults.object(forKey: "Feather.replaceAppsOnUpdate") as? Bool
 		let replaceSameVersion = defaults.object(forKey: "Feather.replaceAppsOnUpdate.sameVersion") as? Bool ?? true
 		let replaceSigned = defaults.object(forKey: "Feather.replaceAppsOnUpdate.signed") as? Bool ?? true
 
 		guard
-			defaults.object(forKey: "Feather.replaceAppsOnUpdate") as? Bool ?? true,
+			replaceApps != false,
 			!signed || replaceSigned,
 			let identifier,
 			!identifier.isEmpty
@@ -54,28 +59,47 @@ extension Storage {
 			return
 		}
 
-		context.perform {
-			var predicates = [NSPredicate(format: "identifier == %@ AND uuid != %@", identifier, uuid)]
-			if !replaceSameVersion {
-				predicates.append(NSPredicate(format: "NOT (version == %@)", version ?? NSNull()))
-			}
-			let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
-			let apps: [AppInfoPresentable]
-
-			if signed {
-				let request: NSFetchRequest<Signed> = Signed.fetchRequest()
-				request.predicate = predicate
-				apps = (try? self.context.fetch(request)) ?? []
-			} else {
-				let request: NSFetchRequest<Imported> = Imported.fetchRequest()
-				request.predicate = predicate
-				apps = (try? self.context.fetch(request)) ?? []
-			}
-
-			for app in apps {
-				self.deleteApp(for: app)
-			}
+		var predicates = [NSPredicate(format: "identifier == %@ AND uuid != %@", identifier, uuid)]
+		if !replaceSameVersion {
+			predicates.append(NSPredicate(format: "NOT (version == %@)", version ?? NSNull()))
 		}
+		let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+		let apps: [AppInfoPresentable]
+
+		if signed {
+			let request: NSFetchRequest<Signed> = Signed.fetchRequest()
+			request.predicate = predicate
+			apps = (try? context.fetch(request)) ?? []
+		} else {
+			let request: NSFetchRequest<Imported> = Imported.fetchRequest()
+			request.predicate = predicate
+			apps = (try? context.fetch(request)) ?? []
+		}
+
+		guard !apps.isEmpty else { return }
+
+		if replaceApps == nil {
+			guard !Self._isAskingToReplace, let presenter = UIApplication.topViewController() else { return }
+			Self._isAskingToReplace = true
+
+			let shouldReplace = await withCheckedContinuation { continuation in
+				UIAlertController.showAlert(
+					presenter,
+					title: .localized("Replace Older Versions?"),
+					message: .localized("Older copies of this app will be deleted whenever a newer one is added. You can change this later in Archive & Compression settings."),
+					actions: [
+						UIAlertAction(title: .localized("Keep"), style: .cancel) { _ in continuation.resume(returning: false) },
+						UIAlertAction(title: .localized("Replace"), style: .destructive) { _ in continuation.resume(returning: true) }
+					]
+				)
+			}
+
+			Self._isAskingToReplace = false
+			defaults.set(shouldReplace, forKey: "Feather.replaceAppsOnUpdate")
+			guard shouldReplace else { return }
+		}
+
+		apps.forEach(deleteApp(for:))
 	}
 
 	func getCertificate(from app: AppInfoPresentable) -> CertificatePair? {

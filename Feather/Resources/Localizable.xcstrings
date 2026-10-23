@@ -19986,6 +19986,74 @@
           }
         }
       }
+    },
+    "Keep" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "유지"
+          }
+        }
+      }
+    },
+    "Replace" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replace"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "교체"
+          }
+        }
+      }
+    },
+    "Replace Older Versions?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replace Older Versions?"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기존 앱을 교체할까요?"
+          }
+        }
+      }
+    },
+    "Older copies of this app will be deleted whenever a newer one is added. You can change this later in Archive & Compression settings." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Older copies of this app will be deleted whenever a newer one is added. You can change this later in Archive & Compression settings."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "새 버전이 추가될 때마다 같은 앱의 기존 버전을 삭제합니다. 나중에 압축 및 보관 설정에서 바꿀 수 있습니다."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

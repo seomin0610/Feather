@@ -201,34 +201,35 @@ final class AppFileHandler: NSObject, @unchecked Sendable {
 		}
 		
 		let bundle = Bundle(url: appUrl)
-		
-		Storage.shared.addImported(
-			uuid: _uuid,
-			source: _sourceProvenance?.sourceRepositoryURL,
-			appName: bundle?.name,
-			appIdentifier: bundle?.bundleIdentifier,
-			appVersion: bundle?.version,
-			appIcon: bundle?.iconFileName
-		) { _ in }
-		
-		if let sourceProvenance = _sourceProvenance {
-			Storage.shared.addSourceMetadata(
-				for: _uuid,
-				kind: .imported,
-				provenance: sourceProvenance
-			)
+		let uuid = _uuid
+		let sourceProvenance = _sourceProvenance
+		let (name, identifier, version, icon) = (bundle?.name, bundle?.bundleIdentifier, bundle?.version, bundle?.iconFileName)
 
-			let sourceAppIdentifier = sourceProvenance.sourceAppIdentifier
-			let installedVersion = sourceProvenance.sourceAppVersion
-			await MainActor.run {
+		// the context lives on the main queue, writing from here could drop the source metadata
+		await MainActor.run {
+			Storage.shared.addImported(
+				uuid: uuid,
+				source: sourceProvenance?.sourceRepositoryURL,
+				appName: name,
+				appIdentifier: identifier,
+				appVersion: version,
+				appIcon: icon
+			) { _ in }
+
+			if let sourceProvenance {
+				Storage.shared.addSourceMetadata(
+					for: uuid,
+					kind: .imported,
+					provenance: sourceProvenance
+				)
 				UpdateManager.shared.removeUpdates(
-					sourceAppIdentifier: sourceAppIdentifier,
-					installedVersion: installedVersion
+					sourceAppIdentifier: sourceProvenance.sourceAppIdentifier,
+					installedVersion: sourceProvenance.sourceAppVersion
 				)
 			}
 		}
 
-		Storage.shared.deleteOutdatedApps(
+		await Storage.shared.deleteOutdatedApps(
 			identifier: bundle?.bundleIdentifier,
 			version: bundle?.version,
 			excluding: _uuid,

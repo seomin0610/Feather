@@ -50,6 +50,7 @@ enum FR {
 		using options: Options,
 		icon: UIImage?,
 		certificate: CertificatePair?,
+		onProgress: ((Double) -> Void)? = nil,
 		completion: @escaping (Error?) -> Void
 	) {
 		Task.detached {
@@ -59,7 +60,12 @@ enum FR {
 			
 			let task = "FeatherSigning_\(app.uuid ?? UUID().uuidString)"
 			LiveTask.start(task, title: app.name ?? Bundle.main.name, subtitle: .localized("Signing"))
-			handler.onProgress = { LiveTask.update(task, progress: $0, subtitle: .localized("Signing")) }
+			handler.onProgress = { progress in
+				LiveTask.update(task, progress: progress, subtitle: .localized("Signing"))
+				if let onProgress {
+					DispatchQueue.main.async { onProgress(progress) }
+				}
+			}
 			
 			do {
 				try await handler.copy()

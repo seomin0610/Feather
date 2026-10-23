@@ -20,6 +20,8 @@ struct SigningView: View {
 	@State private var _isFilePickerPresenting = false
 	@State private var _isImagePickerPresenting = false
 	@State private var _isSigning = false
+	@State private var _signingProgress: Double = 0
+	@State private var _isModifyExpanded = false
 	@State private var _selectedPhoto: PhotosPickerItem? = nil
 	@State var appIcon: UIImage?
 	
@@ -75,11 +77,17 @@ struct SigningView: View {
 							Button {
 								_start()
 							} label: {
-								NBSheetButton(
-									title: signAndInstall ? .localized("Sign & Install") : .localized("Start Signing"),
-									style: .prominent
-								)
-									.padding()
+								Group {
+									if _isSigning {
+										_progressBar()
+									} else {
+										NBSheetButton(
+											title: signAndInstall ? .localized("Sign & Install") : .localized("Start Signing"),
+											style: .prominent
+										)
+									}
+								}
+								.padding()
 							}
 							.buttonStyle(.plain)
 							.offset(y: UIDevice.current.userInterfaceIdiom == .pad ? -20 : -40)
@@ -227,7 +235,24 @@ extension SigningView {
 	@ViewBuilder
 	private func _customizationProperties(for app: AppInfoPresentable) -> some View {
 		NBSection(.localized("Advanced")) {
-			DisclosureGroup(.localized("Modify")) {
+			Button {
+				withAnimation(.smooth) { _isModifyExpanded.toggle() }
+			} label: {
+				HStack {
+					Text(.localized("Modify"))
+						.foregroundColor(_isSigning ? .disabled() : .primary)
+					Spacer()
+					Image(systemName: "chevron.right")
+						.font(.footnote.weight(.semibold))
+						.foregroundColor(_isSigning ? .disabled() : .secondary)
+						.rotationEffect(.degrees(_isModifyExpanded ? 90 : 0))
+				}
+				.contentShape(Rectangle())
+			}
+			.buttonStyle(.plain)
+			.disabled(_isSigning)
+			
+			if _isModifyExpanded {
 				NavigationLink(.localized("Existing Dylibs")) {
 					SigningDylibView(
 						app: app,
@@ -266,6 +291,24 @@ extension SigningView {
 					.foregroundColor(_isSigning ? .disabled() : .primary)
 			}
 		}
+	}
+	
+	@ViewBuilder
+	private func _progressBar() -> some View {
+		ZStack {
+			Capsule().fill(Color(uiColor: .quaternarySystemFill))
+			GeometryReader { proxy in
+				Capsule()
+					.fill(Color.accentColor.opacity(0.35))
+					.frame(width: proxy.size.width * _signingProgress)
+			}
+			.clipShape(Capsule())
+			Text("\(Int(_signingProgress * 100))%")
+				.font(.body.weight(.semibold).monospacedDigit())
+				.foregroundStyle(.secondary)
+				.contentTransition(.numericText())
+		}
+		.frame(height: 50)
 	}
 	
 	@ViewBuilder
@@ -331,7 +374,10 @@ extension SigningView {
 			app,
 			using: options,
 			icon: appIcon,
-			certificate: _selectedCert()
+			certificate: _selectedCert(),
+			onProgress: { progress in
+				withAnimation(.smooth) { _signingProgress = min(max(progress, 0), 1) }
+			}
 		) { error in
 			if let error {
 				let ok = UIAlertAction(title: .localized("Dismiss"), style: .cancel) { _ in

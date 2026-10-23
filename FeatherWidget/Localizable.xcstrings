@@ -12,6 +12,9 @@
         }
       }
     },
+    "%@ updates" : {
+
+    },
     "%lld updates" : {
       "extractionState" : "manual",
       "localizations" : {

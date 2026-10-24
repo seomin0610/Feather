@@ -51,56 +51,25 @@ extension ServerInstaller {
 				? (Self.getLocalAddress() ?? localhost)
 				: localhost
 		} else {
-			return readCommonName() ?? localhost
+			return LocalCertificateAuthority.host
 		}
 	}
 	
 	func tls() throws -> TLSConfiguration? {
-		guard
-			let crt = Self.getUrl("server", ext: "crt"),
-			let pem = Self.getUrl("server", ext: "pem")
-		else {
-			return nil
-		}
+		let files = try LocalCertificateAuthority.serverCertificate()
 		
 		return try TLSConfiguration.makeServerConfiguration(
-			certificateChain: NIOSSLCertificate.fromPEMFile(crt.path).map {
+			certificateChain: NIOSSLCertificate.fromPEMFile(files.certificate.path).map {
 				NIOSSLCertificateSource.certificate($0)
 			},
 			privateKey: .privateKey(
-				try NIOSSLPrivateKey(file: pem.path, format: .pem)
+				try NIOSSLPrivateKey(file: files.key.path, format: .pem)
 			)
 		)
-	}
-	
-	func readCommonName() -> String? {
-		guard let url = Self.getUrl("commonName", ext: "txt") else {
-			return nil
-		}
-		
-		return try? String(contentsOf: url, encoding: .utf8)
-			.trimmingCharacters(in: .whitespacesAndNewlines)
 	}
 }
 
 extension ServerInstaller {
-	static func getUrl(_ name: String, ext: String) -> URL? {
-		let fileManager = FileManager.default
-		
-		let documentsURL = URL.documentsDirectory.appendingPathComponent("\(name).\(ext)")
-		let bundlesURL = Bundle.main.url(forResource: name, withExtension: ext)
-		
-		if fileManager.fileExists(atPath: documentsURL.path) {
-			return documentsURL
-		}
-		
-		if let bundlesURL, fileManager.fileExists(atPath: bundlesURL.path) {
-			return bundlesURL
-		}
-		
-		return nil
-	}
-	
 	static func getLocalAddress() -> String? {
 		var address: String?
 		var ifaddr: UnsafeMutablePointer<ifaddrs>?

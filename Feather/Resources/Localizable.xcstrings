@@ -2665,53 +2665,6 @@
         }
       }
     },
-    "Certificates updated successfully." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تم تحديث الشهادات بنجاح."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Certificates updated successfully."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "인증서가 성공적으로 업데이트되었습니다."
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Certyfikaty zaktualizowano pomyślnie."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sertifikalar başarıyla güncellendi."
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chứng chỉ được cập nhật thành công."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "证书更新成功。"
-          }
-        }
-      }
-    },
     "Change" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6183,77 +6136,6 @@
         }
       }
     },
-    "Failed to download, check your internet connection and try again." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "فشل التنزيل. تحقق من اتصال الإنترنت ثم حاول مرة أخرى."
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nelze stáhnout, zkontrolujte svoje připojení k internetu a zkuste znovu."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Herunterladen fehlgeschlagen. Überprüfe deine Internetverbindung und versuche es erneut."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Failed to download, check your internet connection and try again."
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gagal mengunduh, periksa koneksi internet Anda dan coba lagi."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Download fallito, controlla la tua connessione e riprova."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "다운로드에 실패했습니다, 인터넷 연결 상태를 확인하고 다시 시도하세요."
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nie udało się pobrać. Sprawdź połączenie z internetem i spróbuj ponownie."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "İndirme başarısız oldu. İnternet bağlantınızı kontrol edip tekrar deneyin."
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tải xuống thất bại, hãy kiểm tra kết nối internet của bạn và thử lại."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下载失败，请检查网络连接并重试。"
-          }
-        }
-      }
-    },
     "Failed to load source (%@)" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6969,6 +6851,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "完全本地化"
+          }
+        }
+      }
+    },
+    "Fully local installs need Feather's own certificate, which only works for this device's local server. Install the profile, then turn on full trust for \"Feather Local CA\" in Settings > General > About > Certificate Trust Settings. Until then, Feather installs with Semi Local." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fully local installs need Feather's own certificate, which only works for this device's local server. Install the profile, then turn on full trust for \"Feather Local CA\" in Settings > General > About > Certificate Trust Settings. Until then, Feather installs with Semi Local."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "완전한 로컬 설치에는 Feather 자체 인증서가 필요하며, 이 인증서는 이 기기의 로컬 서버에서만 쓰입니다. 프로파일을 설치한 뒤 설정 > 일반 > 정보 > 인증서 신뢰 설정에서 \"Feather Local CA\"의 완전한 신뢰를 켜세요. 그 전까지는 부분 로컬로 설치합니다."
           }
         }
       }
@@ -9216,6 +9115,23 @@
         }
       }
     },
+    "Install Certificate Profile" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Install Certificate Profile"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "인증서 프로파일 설치"
+          }
+        }
+      }
+    },
     "Install Current Version" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -10078,6 +9994,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "明亮"
+          }
+        }
+      }
+    },
+    "Local Certificate" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Local Certificate"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "로컬 인증서"
           }
         }
       }
@@ -11560,6 +11493,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "空"
+          }
+        }
+      }
+    },
+    "Not Trusted" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not Trusted"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "신뢰되지 않음"
           }
         }
       }
@@ -17241,77 +17191,6 @@
         }
       }
     },
-    "SSL Certificates" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "شهادات SSL"
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SSL certifikáty"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SSL Zertifikate"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SSL Certificates"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sertifikat SSL"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Certificati SSL"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SSL 인증서"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Certyfikaty SSL"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SSL Sertifikaları"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chứng chỉ SSL"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SSL证书"
-          }
-        }
-      }
-    },
     "Standard" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -18934,6 +18813,23 @@
         }
       }
     },
+    "Trusted" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trusted"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "신뢰됨"
+          }
+        }
+      }
+    },
     "Tunnel & Pairing" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -19395,77 +19291,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "有可用更新"
-          }
-        }
-      }
-    },
-    "Update SSL Certificates" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تحديث شهادات SSL"
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aktualizovat SSL certifikáty"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lokale SSL-Zertifikate aktualisieren"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Update SSL Certificates"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Perbarui Sertifikat SSL"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aggiorna i certificati SSL"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SSL 인증서 업데이트"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aktualizuj certyfikaty SSL"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SSL Sertifikalarını Güncelle"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cập nhật chứng chỉ SSL"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "更新SSL证书"
           }
         }
       }

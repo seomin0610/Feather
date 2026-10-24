@@ -16,6 +16,7 @@ struct ArchiveView: View {
 	@AppStorage("Feather.replaceAppsOnUpdate") private var _replaceAppsOnUpdate: Bool = false
 	@AppStorage("Feather.replaceAppsOnUpdate.sameVersion") private var _replaceSameVersion: Bool = true
 	@AppStorage("Feather.replaceAppsOnUpdate.signed") private var _replaceSigned: Bool = true
+	@AppStorage(UpdateManager.deleteAfterSelfUpdateKey) private var _deleteAfterSelfUpdate: Bool = false
 	@AppStorage("Feather.verification.security") private var _showSecurityWarnings: Bool = true
 	@AppStorage("Feather.verification.compatibility") private var _showCompatibilityWarnings: Bool = true
 	
@@ -45,6 +46,12 @@ struct ArchiveView: View {
 				}
 			} footer: {
 				Text(.localized("When a new version of an app is added to your library, older copies with the same bundle identifier will be deleted."))
+			}
+
+			Section {
+				Toggle(.localized("Delete Feather After Updating"), systemImage: "trash", isOn: $_deleteAfterSelfUpdate)
+			} footer: {
+				Text(.localized("After Feather updates itself, its copies in your library will be deleted."))
 			}
 
 			Section {

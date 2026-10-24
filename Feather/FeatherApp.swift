@@ -60,6 +60,11 @@ struct FeatherApp: App {
 				
 				UIApplication.topViewController()?.view.window?.tintColor = UIColor(Color(hex: UserDefaults.standard.string(forKey: "Feather.userTintColor") ?? "#848ef9"))
 			}
+			.task {
+				// give the window a moment so the first-time prompt has something to present on
+				try? await Task.sleep(nanoseconds: 1_000_000_000)
+				await UpdateManager.shared.cleanUpAfterSelfUpdateIfNeeded()
+			}
 		}
 	}
 	

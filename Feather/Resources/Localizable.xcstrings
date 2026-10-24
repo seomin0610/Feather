@@ -1158,6 +1158,23 @@
         }
       }
     },
+    "After Feather updates itself, its copies in your library will be deleted." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After Feather updates itself, its copies in your library will be deleted."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feather가 자체 업데이트되면 라이브러리에 있는 Feather가 삭제됩니다."
+          }
+        }
+      }
+    },
     "All" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4268,6 +4285,40 @@
         }
       }
     },
+    "Delete Feather After Updating" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete Feather After Updating"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "업데이트 후 Feather 삭제"
+          }
+        }
+      }
+    },
+    "Delete Feather from Library?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete Feather from Library?"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "라이브러리에서 Feather를 삭제할까요?"
+          }
+        }
+      }
+    },
     "Deny" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6233,6 +6284,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "데이터 파싱 실패: %@"
+          }
+        }
+      }
+    },
+    "Feather was updated. Its copies in your library can be deleted after every update. You can change this later in Archive & Compression settings." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feather was updated. Its copies in your library can be deleted after every update. You can change this later in Archive & Compression settings."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feather가 업데이트되었습니다. 업데이트할 때마다 라이브러리에 있는 Feather를 삭제할 수 있습니다. 나중에 압축 및 보관 설정에서 변경할 수 있습니다."
           }
         }
       }

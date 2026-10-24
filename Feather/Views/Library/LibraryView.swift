@@ -382,6 +382,7 @@ extension LibraryView {
 			} else if let featherUUID = _pendingFeatherUpdateUUID, !_isDownloadingAppUpdates {
 				uuid = featherUUID
 				_pendingFeatherUpdateUUID = nil
+				updateManager.markSelfUpdateStarted()
 			} else {
 				return
 			}

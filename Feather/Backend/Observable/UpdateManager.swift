@@ -140,6 +140,81 @@ final class UpdateManager: ObservableObject {
 		)
 	}
 
+	static let deleteAfterSelfUpdateKey = "Feather.deleteSelfUpdateFromLibrary"
+	private static let _selfUpdateFromVersionKey = "Feather.selfUpdate.fromVersion"
+	private var _isAskingToDeleteSelfUpdate = false
+
+	private var _runningVersion: String? {
+		Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+	}
+
+	/// Remembers the running version, so the next launch can tell whether Feather was replaced.
+	func markSelfUpdateStarted() {
+		UserDefaults.standard.set(_runningVersion, forKey: Self._selfUpdateFromVersionKey)
+	}
+
+	/// After Feather updated itself, deletes its copies from the library when "Delete Feather After Updating" is enabled, asking the first time.
+	func cleanUpAfterSelfUpdateIfNeeded() async {
+		let defaults = UserDefaults.standard
+		guard
+			let fromVersion = defaults.string(forKey: Self._selfUpdateFromVersionKey),
+			fromVersion != _runningVersion,
+			!_isAskingToDeleteSelfUpdate
+		else {
+			return
+		}
+
+		let repositoryURL = _normalizedSourceURL(FeatherUpdate.repositoryURL)
+		let uuids = Set(Storage.shared.getSourceMetadata().compactMap { metadata -> String? in
+			guard
+				let url = metadata.sourceRepositoryURL,
+				_normalizedSourceURL(url) == repositoryURL
+			else {
+				return nil
+			}
+			return metadata.appUUID
+		})
+
+		let context = Storage.shared.context
+		let signedRequest: NSFetchRequest<Signed> = Signed.fetchRequest()
+		signedRequest.predicate = NSPredicate(format: "uuid IN %@", uuids)
+		let importedRequest: NSFetchRequest<Imported> = Imported.fetchRequest()
+		importedRequest.predicate = NSPredicate(format: "uuid IN %@", uuids)
+		let apps: [AppInfoPresentable] =
+			((try? context.fetch(signedRequest)) ?? []) +
+			((try? context.fetch(importedRequest)) ?? [])
+
+		guard !apps.isEmpty else {
+			defaults.removeObject(forKey: Self._selfUpdateFromVersionKey)
+			return
+		}
+
+		var shouldDelete = defaults.object(forKey: Self.deleteAfterSelfUpdateKey) as? Bool
+		if shouldDelete == nil {
+			guard let presenter = UIApplication.topViewController() else { return }
+			_isAskingToDeleteSelfUpdate = true
+
+			shouldDelete = await withCheckedContinuation { continuation in
+				UIAlertController.showAlert(
+					presenter,
+					title: .localized("Delete Feather from Library?"),
+					message: .localized("Feather was updated. Its copies in your library can be deleted after every update. You can change this later in Archive & Compression settings."),
+					actions: [
+						UIAlertAction(title: .localized("Keep"), style: .cancel) { _ in continuation.resume(returning: false) },
+						UIAlertAction(title: .localized("Delete"), style: .destructive) { _ in continuation.resume(returning: true) }
+					]
+				)
+			}
+
+			_isAskingToDeleteSelfUpdate = false
+			defaults.set(shouldDelete, forKey: Self.deleteAfterSelfUpdateKey)
+		}
+
+		defaults.removeObject(forKey: Self._selfUpdateFromVersionKey)
+		guard shouldDelete == true else { return }
+		apps.forEach(Storage.shared.deleteApp(for:))
+	}
+
 	private func _findFeatherUpdate() async -> FeatherUpdate? {
 		guard let repository = await _fetchRepository(from: FeatherUpdate.repositoryURL) else {
 			return featherUpdate

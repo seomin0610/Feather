@@ -112,12 +112,13 @@ final class UpdateManager: ObservableObject {
 		}
 	}
 
+	/// Feather goes last, since installing it replaces the running app.
 	func updateAll() {
-		if let featherUpdate, download(for: featherUpdate) == nil {
-			startFeatherUpdate(featherUpdate)
-		}
 		for update in pendingUpdates where download(for: update) == nil {
 			startUpdate(update)
+		}
+		if let featherUpdate, download(for: featherUpdate) == nil {
+			startFeatherUpdate(featherUpdate)
 		}
 	}
 

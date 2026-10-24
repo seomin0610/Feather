@@ -23,6 +23,7 @@ struct LibraryView: View {
 	@State private var _updateCheckRotation = 0.0
 	@State private var _isUpdateCheckCompleteVisible = false
 	@State private var _pendingSignUpdateUUIDs: [String] = []
+	@State private var _pendingFeatherUpdateUUID: String?
 
 	// MARK: Selection State
 	@State private var _selectedAppUUIDs: Set<String> = []
@@ -286,7 +287,14 @@ struct LibraryView: View {
 			}
 			.onReceive(NotificationCenter.default.publisher(for: Notification.Name("Feather.signUpdatedApp"))) { notification in
 				guard let uuid = notification.object as? String else { return }
-				_pendingSignUpdateUUIDs.append(uuid)
+				if notification.userInfo?["isFeather"] as? Bool == true {
+					_pendingFeatherUpdateUUID = uuid
+				} else {
+					_pendingSignUpdateUUIDs.append(uuid)
+				}
+				_presentNextSignUpdate()
+			}
+			.onChange(of: downloadManager.downloads.count) { _ in
 				_presentNextSignUpdate()
 			}
 			.onChange(of: _selectedSigningAppPresenting?.id) { _ in
@@ -357,18 +365,26 @@ extension LibraryView {
 	}
 
 	/// Presents signing for downloaded updates one at a time, waiting for any signing or install sheet to close.
+	/// Feather's own update waits until every other update has downloaded and installed, since installing it replaces the running app.
 	private func _presentNextSignUpdate() {
 		// the install sheet appears shortly after signing dismisses, so give it time before checking
 		DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
 			guard
 				_selectedSigningAppPresenting == nil,
-				_selectedInstallAppPresenting == nil,
-				!_pendingSignUpdateUUIDs.isEmpty
+				_selectedInstallAppPresenting == nil
 			else {
 				return
 			}
 
-			let uuid = _pendingSignUpdateUUIDs.removeFirst()
+			let uuid: String
+			if !_pendingSignUpdateUUIDs.isEmpty {
+				uuid = _pendingSignUpdateUUIDs.removeFirst()
+			} else if let featherUUID = _pendingFeatherUpdateUUID, !_isDownloadingAppUpdates {
+				uuid = featherUUID
+				_pendingFeatherUpdateUUID = nil
+			} else {
+				return
+			}
 			let request: NSFetchRequest<Imported> = Imported.fetchRequest()
 			request.predicate = NSPredicate(format: "uuid == %@", uuid)
 			request.fetchLimit = 1
@@ -379,6 +395,12 @@ extension LibraryView {
 			}
 
 			_selectedSigningAppPresenting = AnyApp(base: app, signAndInstall: true)
+		}
+	}
+
+	private var _isDownloadingAppUpdates: Bool {
+		downloadManager.downloads.contains {
+			$0.id.hasPrefix(AppUpdate.downloadIDPrefix) && $0.id != FeatherUpdate.downloadID
 		}
 	}
 

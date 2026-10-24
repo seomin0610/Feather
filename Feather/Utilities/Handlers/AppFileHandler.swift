@@ -239,8 +239,13 @@ final class AppFileHandler: NSObject, @unchecked Sendable {
 		// updates from the library go straight to signing, then install
 		if _download?.id.hasPrefix(AppUpdate.downloadIDPrefix) == true {
 			let uuid = _uuid
+			let isFeather = _download?.id == FeatherUpdate.downloadID
 			DispatchQueue.main.async {
-				NotificationCenter.default.post(name: Notification.Name("Feather.signUpdatedApp"), object: uuid)
+				NotificationCenter.default.post(
+					name: Notification.Name("Feather.signUpdatedApp"),
+					object: uuid,
+					userInfo: ["isFeather": isFeather]
+				)
 			}
 		}
 	}

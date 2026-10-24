@@ -12940,6 +12940,40 @@
         }
       }
     },
+    "Preparing Self-Update" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preparing Self-Update"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "자체 업데이트 준비 중"
+          }
+        }
+      }
+    },
+    "Preparing Self-Update (%lld%%)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preparing Self-Update (%lld%%)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "자체 업데이트 준비 중 (%lld%%)"
+          }
+        }
+      }
+    },
     "Previous Versions" : {
       "comment" : "Repository app previous versions",
       "extractionState" : "manual",
@@ -17752,6 +17786,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "切换回去"
+          }
+        }
+      }
+    },
+    "Tap Install after Feather closes to start the update!" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap Install after Feather closes to start the update!"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feather가 닫힌 뒤 설치를 누르면 업데이트가 시작됩니다!"
           }
         }
       }

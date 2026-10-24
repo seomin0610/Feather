@@ -63,7 +63,7 @@ struct InstallPreviewView: View {
 			LiveTask.update(_taskId, progress: progress * 0.5, subtitle: .localized("Packaging"))
 		}
 		.onChange(of: viewModel.installProgress) { progress in
-			LiveTask.update(_taskId, progress: 0.5 + progress * 0.5, subtitle: .localized("Installing"))
+			LiveTask.update(_taskId, progress: 0.5 + progress * 0.5, subtitle: _installsThroughServer ? .localized("Preparing Self-Update") : .localized("Installing"))
 		}
 		.onReceive(viewModel.$status) { newStatus in
 			switch newStatus {
@@ -139,7 +139,7 @@ struct InstallPreviewView: View {
 	
 	@ViewBuilder
 	private func _status() -> some View {
-		Label(viewModel.statusLabel, systemImage: viewModel.statusImage)
+		Label(_statusLabel, systemImage: viewModel.statusImage)
 			.padding()
 			.labelStyle(.titleAndIcon)
 			.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
@@ -149,7 +149,7 @@ struct InstallPreviewView: View {
 	@ViewBuilder
 	private func _button() -> some View {
 		ZStack {
-			if viewModel.isCompleted {
+			if viewModel.isCompleted, !_installsThroughServer {
 				Button {
 					UIApplication.openApp(with: app.identifier ?? "")
 				} label: {
@@ -163,11 +163,28 @@ struct InstallPreviewView: View {
 		.animation(.easeInOut(duration: 0.3), value: viewModel.isCompleted)
 	}
 	
-	private func _install() {
-		// Feather can't serve itself to itself, so its own installs go through the signer server
-		let installsThroughServer = !isSharing
+	// Feather can't serve itself to itself, so its own installs go through the signer server
+	private var _installsThroughServer: Bool {
+		!isSharing
 			&& _installationMethod == 0
 			&& app.identifier == Bundle.main.bundleIdentifier
+	}
+
+	private var _statusLabel: String {
+		guard _installsThroughServer else { return viewModel.statusLabel }
+
+		switch viewModel.status {
+		case .sendingPayload:
+			return .localized("Preparing Self-Update (%lld%%)", arguments: Int(viewModel.installProgress * 100))
+		case .completed:
+			return .localized("Tap Install after Feather closes to start the update!")
+		default:
+			return viewModel.statusLabel
+		}
+	}
+
+	private func _install() {
+		let installsThroughServer = _installsThroughServer
 				
 		Task.detached {
 			let handler = await ArchiveHandler(app: app, viewModel: viewModel)

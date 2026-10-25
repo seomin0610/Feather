@@ -14,16 +14,16 @@ struct DownloadHeaderView: View {
 	
 	var body: some View {
 		ZStack {
-			if !downloadManager.manualDownloads.isEmpty {
+			if !downloadManager.downloads.isEmpty {
 				VStack {
 					VStack(spacing: 12) {
-						if let firstDownload = downloadManager.manualDownloads.first {
+						if let firstDownload = downloadManager.downloads.first {
 							DownloadItemView(download: firstDownload)
 							
-							if downloadManager.manualDownloads.count > 1 {
+							if downloadManager.downloads.count > 1 {
 								HStack {
 									Spacer()
-									Text(verbatim: "+\(downloadManager.manualDownloads.count - 1)")
+									Text(verbatim: "+\(downloadManager.downloads.count - 1)")
 										.font(.caption)
 										.foregroundColor(.secondary)
 										.padding(.vertical, 4)
@@ -36,7 +36,7 @@ struct DownloadHeaderView: View {
 				.transition(.move(edge: .top).combined(with: .opacity))
 			}
 		}
-		.animation(.spring(), value: downloadManager.manualDownloads.count)
+		.animation(.spring(), value: downloadManager.downloads.count)
 	}
 }
 
@@ -53,14 +53,14 @@ struct DownloadItemView: View {
 				.font(.subheadline)
 				.lineLimit(1)
 			
-			ProgressView(value: overallProgress)
+			ProgressView(value: _phaseProgress)
 				.progressViewStyle(.linear)
 			
 			HStack {
-				Text(verbatim: "\(Int(overallProgress * 100))%")
+				Text(verbatim: "\(_isExtracting ? String.localized("Extracting") : String.localized("Downloading")) \(Int(_phaseProgress * 100))%")
 					.contentTransition(.numericText())
 				Spacer()
-				if totalBytes > 0 {
+				if !_isExtracting, totalBytes > 0 {
 					Text(verbatim: "\($bytesDownloaded.wrappedValue.formattedByteCount) / \(totalBytes.formattedByteCount)")
 						.contentTransition(.numericText())
 				}
@@ -75,9 +75,11 @@ struct DownloadItemView: View {
 		.onReceive(download.$unpackageProgress) { self.unpackageProgress = $0 }
 	}
 	
-	private var overallProgress: Double {
-		download.onlyArchiving
-			? unpackageProgress
-			: (0.3 * unpackageProgress) + (0.7 * progress)
+	private var _isExtracting: Bool {
+		download.onlyArchiving || progress >= 1
+	}
+	
+	private var _phaseProgress: Double {
+		_isExtracting ? unpackageProgress : progress
 	}
 }

@@ -51,10 +51,6 @@ class DownloadManager: NSObject, ObservableObject {
 	
 	@Published var downloads: [Download] = []
 	
-	var manualDownloads: [Download] {
-		downloads.filter { isManualDownload($0.id) }
-	}
-	
 	private var _session: URLSession!
 	
 	#if !targetEnvironment(macCatalyst)
@@ -155,10 +151,6 @@ class DownloadManager: NSObject, ObservableObject {
 			_updateBackgroundAudioState()
 			#endif
 		}
-	}
-	
-	func isManualDownload(_ string: String) -> Bool {
-		return string.contains("FeatherManualDownload")
 	}
 	
 	func getDownload(by id: String) -> Download? {

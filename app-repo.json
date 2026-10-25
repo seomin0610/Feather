@@ -15,10 +15,10 @@
       "versions": [
         {
           "version": "2.9.4",
-          "date": "2026-10-25T12:27:35Z",
-          "size": 16216233,
+          "date": "2026-10-25T14:23:36Z",
+          "size": 16218453,
           "downloadURL": "https://github.com/seomin0610/Feather/releases/download/v2.9.4/Feather.ipa",
-          "localizedDescription": "## What's New\r\n- **Home Screen widget**: shows available updates with fanned app icons, checks in the background and follows the app tint\r\n- **On-device certificate authority** replaces backloop.dev for local installs, with a first-launch guide to trusting it\r\n- Signing, download and install progress shown as a Live Activity on the Lock Screen and in the Dynamic Island\r\n- Download progress split into downloading and extracting\r\n- Signing progress shown on the sign button\r\n- Export and import the database\r\n- App info shows where an app came from\r\n- Warn before adding apps that don't match their source or device\r\n- Ask once before replacing older versions of an app\r\n- Alert when an OTA install stalls or fails\r\n- Feather updates itself after every other app, and can optionally be removed from the library afterwards\r\n- Make an idevice pairing file from the Remote CLI and send it to the device\r\n- Reject certificates whose p12 isn't in the provisioning profile\r\n\r\n## Bug Fixes\r\n- Compression level picked in settings is now used when archiving\r\n- Get, Open and Update buttons share one width in Sources\r\n- Modify chevron matches the system one\r\n- Alternate app icons declared for iPad, and icon change errors are shown\r\n- Real RSD tunnel error is shown and recovers after a failure\r\n- WWDR G2–G8 issuers supported in the revoke check\r\n- Korean wording: 더 보기 and 확인; 소스 renamed to 저장소\r\n\r\n**Full Changelog**: https://github.com/seomin0610/2.9.4"
+          "localizedDescription": "## What's New\r\n- **Home Screen widget**: shows available updates with fanned app icons, checks in the background and follows the app tint\r\n- **On-device certificate authority** replaces backloop.dev for local installs, with a first-launch guide to trusting it\r\n- Onboarding can be reset from the Reset page\r\n- Signing, download and install progress shown as a Live Activity on the Lock Screen and in the Dynamic Island\r\n- Download progress split into downloading and extracting\r\n- Signing progress shown on the sign button\r\n- Export and import the database\r\n- App info shows where an app came from\r\n- Warn before adding apps that don't match their source or device\r\n- Ask once before replacing older versions of an app\r\n- Alert when an OTA install stalls or fails\r\n- Feather updates itself after every other app, and can optionally be removed from the library afterwards\r\n- Make an idevice pairing file from the Remote CLI and send it to the device\r\n- Reject certificates whose p12 isn't in the provisioning profile\r\n\r\n## Bug Fixes\r\n- Fixed certificates being rejected with a wrong password error after Feather imported its own signing certificate\r\n- Fixed the certificate setup guide being skipped when Feather was launched in the background after an update\r\n- Compression level picked in settings is now used when archiving\r\n- Get, Open and Update buttons share one width in Sources\r\n- Modify chevron matches the system one\r\n- Alternate app icons declared for iPad, and icon change errors are shown\r\n- Real RSD tunnel error is shown and recovers after a failure\r\n- WWDR G2–G8 issuers supported in the revoke check\r\n- Korean wording: 더 보기 and 확인; 소스 renamed to 저장소\r\n\r\n**Full Changelog**: https://github.com/seomin0610/Feather/compare/v2.9.3...v2.9.4"
         },
         {
           "version": "2.9.3",
@@ -54,8 +54,8 @@
         "https://github.com/khcrysalis/Feather/blob/v1.x/Images/Store.png?raw=true"
       ],
       "version": "2.9.4",
-      "versionDate": "2026-10-25T12:27:35Z",
-      "size": 16216233,
+      "versionDate": "2026-10-25T14:23:36Z",
+      "size": 16218453,
       "downloadURL": "https://github.com/seomin0610/Feather/releases/download/v2.9.4/Feather.ipa"
     }
   ],

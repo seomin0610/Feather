@@ -550,7 +550,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld개 소스"
+            "value" : "%lld개 저장소"
           }
         },
         "pl" : {
@@ -615,7 +615,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "소스에 적힌 것과 다른 버전이 받아졌습니다. 소스 관리가 잘못됐거나 파일이 바꿔치기되었을 수 있습니다."
+            "value" : "저장소에 적힌 것과 다른 버전이 받아졌습니다. 저장소 관리가 잘못됐거나 파일이 바꿔치기되었을 수 있습니다."
           }
         }
       }
@@ -940,7 +940,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "소스 추가"
+            "value" : "저장소 추가"
           }
         },
         "pl" : {
@@ -1385,6 +1385,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "全部仓库"
+          }
+        }
+      }
+    },
+    "All Set" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All Set"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "준비 완료"
           }
         }
       }
@@ -1861,6 +1878,23 @@
         }
       }
     },
+    "Apps now install fully on this device." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apps now install fully on this device."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이제 앱이 기기 안에서만 설치됩니다."
+          }
+        }
+      }
+    },
     "Archive & Compression" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1945,6 +1979,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "사용 가능한 업데이트"
+          }
+        }
+      }
+    },
+    "backloop.dev has shut down. To keep installing fully on this device, Feather now uses a certificate it makes itself." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "backloop.dev has shut down. To keep installing fully on this device, Feather now uses a certificate it makes itself."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "backloop.dev 서비스가 종료되었습니다. 기기 안에서만 설치하려면 이제 Feather가 직접 만든 인증서를 사용해야 합니다."
           }
         }
       }
@@ -2051,7 +2102,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "앱을 추가하기 전에 번들 ID, 버전, 파일 해시가 소스에 표기된 내용과 같은지, 이 iOS 버전을 지원하는지 확인합니다."
+            "value" : "앱을 추가하기 전에 번들 ID, 버전, 파일 해시가 저장소에 표기된 내용과 같은지, 이 iOS 버전을 지원하는지 확인합니다."
           }
         }
       }
@@ -3122,6 +3173,23 @@
         }
       }
     },
+    "Come back here after turning it on." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Come back here after turning it on."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "켠 뒤 이 화면으로 돌아오세요."
+          }
+        }
+      }
+    },
     "Compatibility Warning" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3342,6 +3410,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "LocalDevVPN에 연결"
+          }
+        }
+      }
+    },
+    "Continue" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "계속"
           }
         }
       }
@@ -4642,6 +4727,40 @@
         }
       }
     },
+    "Done" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "완료"
+          }
+        }
+      }
+    },
+    "Download Complete" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download Complete"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다운로드 완료"
+          }
+        }
+      }
+    },
     "Download Failed" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4721,6 +4840,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "下载LocalDevVPN"
+          }
+        }
+      }
+    },
+    "Download the profile" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download the profile"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "프로파일 받기"
           }
         }
       }
@@ -5374,7 +5510,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "소스 URL를 입력하세요"
+            "value" : "저장소 URL을 입력하세요"
           }
         },
         "pl" : {
@@ -6136,6 +6272,23 @@
         }
       }
     },
+    "Extracting" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extracting"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "압축 해제 중"
+          }
+        }
+      }
+    },
     "Failed to load source (%@)" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6148,7 +6301,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "소스를 불러오지 못했어요 (%@)"
+            "value" : "저장소를 불러오지 못했어요 (%@)"
           }
         }
       }
@@ -6166,6 +6319,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "데이터 파싱 실패: %@"
+          }
+        }
+      }
+    },
+    "Feather Local CA is trusted." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feather Local CA is trusted."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feather Local CA를 신뢰합니다."
           }
         }
       }
@@ -6199,7 +6369,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "FeatherPlus 데이터가 발견되었습니다. 마이그레이션하면 현재 앱, 인증서, 소스가 FeatherPlus 데이터로 대체되고 앱이 재시작됩니다."
+            "value" : "FeatherPlus 데이터가 발견되었습니다. 마이그레이션하면 현재 앱, 인증서, 저장소가 FeatherPlus 데이터로 대체되고 앱이 재시작됩니다."
           }
         }
       }
@@ -6855,19 +7025,36 @@
         }
       }
     },
-    "Fully local installs need Feather's own certificate, which only works for this device's local server. Install the profile, then turn on full trust for \"Feather Local CA\" in Settings > General > About > Certificate Trust Settings. Until then, Feather installs with Semi Local." : {
+    "Fully local installs need Feather's own certificate, which only works for this device's local server. Install the profile, then turn on full trust for \"Feather Local CA\" in Settings > General > About > Certificate Trust Settings. Until then, apps can't be installed with Fully Local." : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fully local installs need Feather's own certificate, which only works for this device's local server. Install the profile, then turn on full trust for \"Feather Local CA\" in Settings > General > About > Certificate Trust Settings. Until then, Feather installs with Semi Local."
+            "value" : "Fully local installs need Feather's own certificate, which only works for this device's local server. Install the profile, then turn on full trust for \"Feather Local CA\" in Settings > General > About > Certificate Trust Settings. Until then, apps can't be installed with Fully Local."
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "완전한 로컬 설치에는 Feather 자체 인증서가 필요하며, 이 인증서는 이 기기의 로컬 서버에서만 쓰입니다. 프로파일을 설치한 뒤 설정 > 일반 > 정보 > 인증서 신뢰 설정에서 \"Feather Local CA\"의 완전한 신뢰를 켜세요. 그 전까지는 부분 로컬로 설치합니다."
+            "value" : "완전한 로컬 설치에는 Feather 자체 인증서가 필요하며, 이 인증서는 이 기기의 로컬 서버에서만 쓰입니다. 프로파일을 설치한 뒤 설정 > 일반 > 정보 > 인증서 신뢰 설정에서 \"Feather Local CA\"의 완전한 신뢰를 켜세요. 그 전까지는 완전한 로컬로 앱을 설치할 수 없습니다."
+          }
+        }
+      }
+    },
+    "Fully Local needs Feather's own certificate. Install the profile, then turn on full trust for \"Feather Local CA\" in Settings > General > About > Certificate Trust Settings, or switch to Semi Local in Installation settings." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fully Local needs Feather's own certificate. Install the profile, then turn on full trust for \"Feather Local CA\" in Settings > General > About > Certificate Trust Settings, or switch to Semi Local in Installation settings."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "완전한 로컬로 설치하려면 Feather 자체 인증서가 필요합니다. 프로파일을 설치한 뒤 설정 > 일반 > 정보 > 인증서 신뢰 설정에서 \"Feather Local CA\"의 완전한 신뢰를 켜거나, 설치 설정에서 부분 로컬로 바꾸세요."
           }
         }
       }
@@ -7010,6 +7197,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "一般"
+          }
+        }
+      }
+    },
+    "General › About › Certificate Trust Settings › Feather Local CA" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "General › About › Certificate Trust Settings › Feather Local CA"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일반 › 정보 › 인증서 신뢰 설정 › Feather Local CA"
+          }
+        }
+      }
+    },
+    "General › VPN & Device Management › Feather Local Certificate" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "General › VPN & Device Management › Feather Local Certificate"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일반 › VPN 및 기기 관리 › Feather Local Certificate"
           }
         }
       }
@@ -7200,6 +7421,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "显示信息"
+          }
+        }
+      }
+    },
+    "Get Started" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get Started"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시작하기"
           }
         }
       }
@@ -7525,6 +7763,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "来我们的GitHub仓库添加星标！"
+          }
+        }
+      }
+    },
+    "Go to Settings › General › About › Certificate Trust Settings and turn on \"Feather Local CA\"." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Go to Settings › General › About › Certificate Trust Settings and turn on \"Feather Local CA\"."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설정 › 일반 › 정보 › 인증서 신뢰 설정에서 \"Feather Local CA\"를 켜세요."
           }
         }
       }
@@ -8667,6 +8922,23 @@
         }
       }
     },
+    "In Settings, tap Profile Downloaded, or go to General › VPN & Device Management, then install \"Feather Local Certificate\"." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In Settings, tap Profile Downloaded, or go to General › VPN & Device Management, then install \"Feather Local Certificate\"."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설정 앱에서 '프로필이 다운로드됨'을 누르거나 일반 › VPN 및 기기 관리로 가서 \"Feather Local Certificate\"를 설치하세요."
+          }
+        }
+      }
+    },
     "Info" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9062,6 +9334,23 @@
         }
       }
     },
+    "Install a profile and trust it. It stays trusted even if you reinstall Feather." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Install a profile and trust it. It stays trusted even if you reinstall Feather."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "프로파일을 설치하고 신뢰하면 끝입니다. Feather를 다시 설치해도 유지됩니다."
+          }
+        }
+      }
+    },
     "Install After Signing" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9128,6 +9417,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "인증서 프로파일 설치"
+          }
+        }
+      }
+    },
+    "Install Complete" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Install Complete"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설치 완료"
           }
         }
       }
@@ -9205,6 +9511,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "安装当前版本"
+          }
+        }
+      }
+    },
+    "Install the profile" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Install the profile"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "프로파일 설치"
           }
         }
       }
@@ -9394,6 +9717,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在安装"
+          }
+        }
+      }
+    },
+    "Installing Has Changed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installing Has Changed"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설치 방식이 바뀌었습니다"
           }
         }
       }
@@ -11392,7 +11732,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "복사할 소스 없음"
+            "value" : "복사할 저장소 없음"
           }
         },
         "pl" : {
@@ -11433,7 +11773,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "내보낼 소스 없음"
+            "value" : "내보낼 저장소 없음"
           }
         }
       }
@@ -11649,7 +11989,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "이 소스를 신뢰하는 경우에만 추가하세요."
+            "value" : "이 저장소를 신뢰하는 경우에만 추가하세요."
           }
         }
       }
@@ -11826,7 +12166,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "소스가 소개되기를 원하신다면 GitHub에서 [이슈](https://github.com/seomin0610/Feather/issues)를 등록해 주세요."
+            "value" : "저장소가 소개되기를 원하신다면 GitHub에서 [이슈](https://github.com/seomin0610/Feather/issues)를 등록해 주세요."
           }
         },
         "pl" : {
@@ -14945,7 +15285,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "소스 초기화"
+            "value" : "저장소 초기화"
           }
         },
         "pl" : {
@@ -15004,7 +15344,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "애플리케이션 소스, 인증서, 앱 및 일반 콘텐츠를 초기화합니다."
+            "value" : "애플리케이션 저장소, 인증서, 앱 및 일반 콘텐츠를 초기화합니다."
           }
         },
         "pl" : {
@@ -15505,7 +15845,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "소스별 모든 앱 보기"
+            "value" : "저장소별 모든 앱 보기"
           }
         },
         "pl" : {
@@ -16935,7 +17275,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "소스"
+            "value" : "저장소"
           }
         },
         "pl" : {
@@ -17006,7 +17346,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "소스 URL"
+            "value" : "저장소 URL"
           }
         },
         "pl" : {
@@ -17090,7 +17430,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "소스"
+            "value" : "저장소"
           }
         },
         "pl" : {
@@ -17137,7 +17477,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "소스를 클립보드에 복사함"
+            "value" : "저장소를 클립보드에 복사함"
           }
         },
         "pl" : {
@@ -17995,7 +18335,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "지금 있는 앱, 인증서, 소스 목록을 불러온 것으로 바꾸고 앱을 다시 시작합니다."
+            "value" : "지금 있는 앱, 인증서, 저장소 목록을 불러온 것으로 바꾸고 앱을 다시 시작합니다."
           }
         }
       }
@@ -18012,7 +18352,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "데이터베이스에는 앱, 인증서, 소스 목록만 들어 있고 파일 자체는 들어 있지 않습니다. 불러오면 지금 데이터베이스를 바꾸고 앱을 다시 시작합니다."
+            "value" : "데이터베이스에는 앱, 인증서, 저장소 목록만 들어 있고 파일 자체는 들어 있지 않습니다. 불러오면 지금 데이터베이스를 바꾸고 앱을 다시 시작합니다."
           }
         }
       }
@@ -18445,7 +18785,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "소스에서 받은 앱이 아닙니다."
+            "value" : "저장소에서 받은 앱이 아닙니다."
           }
         }
       }
@@ -18572,7 +18912,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "소스가 소개한 앱과 다른 앱입니다. 이름과 아이콘만 흉내 낸 가짜 앱일 수 있습니다."
+            "value" : "저장소가 소개한 앱과 다른 앱입니다. 이름과 아이콘만 흉내 낸 가짜 앱일 수 있습니다."
           }
         }
       }
@@ -18589,7 +18929,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "소스가 올린 파일과 다릅니다. 받는 도중 바뀌었거나 누군가 악성 코드를 넣었을 수 있습니다."
+            "value" : "저장소가 올린 파일과 다릅니다. 받는 도중 바뀌었거나 누군가 악성 코드를 넣었을 수 있습니다."
           }
         }
       }
@@ -20134,6 +20474,261 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "iOS가 설치 매니페스트는 읽었지만 앱을 내려받지 않았습니다. 설치 창이 취소되었거나 앱 서명이 이 기기에서 유효하지 않을 수 있습니다."
+          }
+        }
+      }
+    },
+    "It only works for Feather's own server on this device." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It only works for Feather's own server on this device."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 기기의 Feather 서버에서만 쓰입니다."
+          }
+        }
+      }
+    },
+    "Local Certificate Not Trusted" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Local Certificate Not Trusted"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "로컬 인증서가 신뢰되지 않음"
+          }
+        }
+      }
+    },
+    "Made on this device" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Made on this device"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 기기에서 만든 인증서"
+          }
+        }
+      }
+    },
+    "No certificate needed, but each install goes through an outside server." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No certificate needed, but each install goes through an outside server."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "인증서가 필요 없지만, 설치할 때마다 외부 서버를 거칩니다."
+          }
+        }
+      }
+    },
+    "Open in Safari" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open in Safari"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Safari에서 열기"
+          }
+        }
+      }
+    },
+    "Open Settings" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Settings"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설정 열기"
+          }
+        }
+      }
+    },
+    "Or use Semi Local" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Or use Semi Local"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "또는 부분 로컬"
+          }
+        }
+      }
+    },
+    "Safari opens and asks to download a configuration profile. Tap Allow." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Safari opens and asks to download a configuration profile. Tap Allow."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Safari가 열리고 구성 프로파일 다운로드를 묻습니다. 허용을 누르세요."
+          }
+        }
+      }
+    },
+    "Set It Up Anytime" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set It Up Anytime"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "언제든 설정할 수 있습니다"
+          }
+        }
+      }
+    },
+    "Set Up Later" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set Up Later"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "나중에 설정"
+          }
+        }
+      }
+    },
+    "Set up once" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set up once"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "한 번만 설정"
+          }
+        }
+      }
+    },
+    "Signing Complete" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Signing Complete"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서명 완료"
+          }
+        }
+      }
+    },
+    "Turn on full trust" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn on full trust"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "완전한 신뢰 켜기"
+          }
+        }
+      }
+    },
+    "Until then, Fully Local can't install apps. You can finish setup or switch to Semi Local in Settings › Installation." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Until then, Fully Local can't install apps. You can finish setup or switch to Semi Local in Settings › Installation."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "그 전까지는 완전한 로컬로 설치할 수 없습니다. 설정 › 설치에서 마저 설정하거나 부분 로컬로 바꿀 수 있습니다."
+          }
+        }
+      }
+    },
+    "Use Semi Local" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use Semi Local"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "부분 로컬 사용"
           }
         }
       }

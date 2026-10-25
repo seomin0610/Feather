@@ -19,9 +19,12 @@ struct LocalCertificateNoticeView: View {
 	private let _stepCount = 5
 
 	static func shouldPresent() -> Bool {
-		guard !UserDefaults.standard.bool(forKey: _shownKey) else { return false }
+		!UserDefaults.standard.bool(forKey: _shownKey)
+	}
+
+	/// Background launches build the app too, so it only counts once it's on screen.
+	private static func _markShown() {
 		UserDefaults.standard.set(true, forKey: _shownKey)
-		return true
 	}
 
 	#if DEBUG
@@ -48,11 +51,13 @@ struct LocalCertificateNoticeView: View {
 		}
 		.background(Color(uiColor: .systemBackground).ignoresSafeArea())
 		.task {
+			if _scenePhase == .active { Self._markShown() }
 			await _checkTrust()
 		}
 		.onChange(of: _scenePhase) { phase in
 			if phase == .background { SettingsGuide.announce() }
 			guard phase == .active else { return }
+			Self._markShown()
 			SettingsGuide.stop()
 			Task { await _checkTrust() }
 		}

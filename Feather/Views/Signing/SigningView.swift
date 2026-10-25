@@ -244,7 +244,7 @@ extension SigningView {
 					Spacer()
 					Image(systemName: "chevron.right")
 						.font(.footnote.weight(.semibold))
-						.foregroundColor(_isSigning ? .disabled() : .secondary)
+						.foregroundColor(_isSigning ? .disabled() : Color(uiColor: .tertiaryLabel))
 						.rotationEffect(.degrees(_isModifyExpanded ? 90 : 0))
 				}
 				.contentShape(Rectangle())

@@ -27,11 +27,9 @@ struct LocalCertificateNoticeView: View {
 		UserDefaults.standard.set(true, forKey: _shownKey)
 	}
 
-	#if DEBUG
 	static func resetShown() {
 		UserDefaults.standard.removeObject(forKey: _shownKey)
 	}
-	#endif
 
 	var body: some View {
 		VStack(spacing: 0) {

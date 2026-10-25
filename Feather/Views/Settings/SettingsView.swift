@@ -98,9 +98,6 @@ struct SettingsView: View {
 
 				#if DEBUG
 				Section {
-					Button("Reset Onboarding", systemImage: "arrow.counterclockwise") {
-						LocalCertificateNoticeView.resetShown()
-					}
 					Button("Preview Progress Activity", systemImage: "progress.indicator") {
 						Task {
 							let id = "FeatherDebugPreview"
@@ -132,7 +129,7 @@ struct SettingsView: View {
 				} header: {
 					Text(verbatim: "Debug")
 				} footer: {
-					Text(verbatim: "Reset Onboarding shows the local certificate notice again on the next launch. The previews run a fake signing or download job for about 10 seconds, leave the app to see them.")
+					Text(verbatim: "The previews run a fake signing or download job for about 10 seconds, leave the app to see them.")
 				}
 				#endif
 			}

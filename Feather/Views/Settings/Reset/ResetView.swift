@@ -17,6 +17,7 @@ struct ResetView: View {
 		NBList(.localized("Reset")) {
 			_cache()
 			_coredata()
+			_onboarding()
 			_all()
 		}
 	}
@@ -117,6 +118,17 @@ extension ResetView {
 					message: Storage.shared.countContent(for: CertificatePair.self)
 				) {
 					Self.resetCertificates()
+				}
+			}
+		}
+	}
+	
+	@ViewBuilder
+	private func _onboarding() -> some View {
+		Section {
+			Button(.localized("Reset Onboarding"), systemImage: "arrow.counterclockwise") {
+				Self.resetAlert(title: .localized("Reset Onboarding")) {
+					LocalCertificateNoticeView.resetShown()
 				}
 			}
 		}

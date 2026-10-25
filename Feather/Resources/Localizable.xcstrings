@@ -15137,6 +15137,23 @@
         }
       }
     },
+    "Reset Onboarding" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset Onboarding"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "온보딩 초기화"
+          }
+        }
+      }
+    },
     "Reset Settings" : {
       "extractionState" : "manual",
       "localizations" : {

@@ -100,14 +100,21 @@ struct DownloadButtonView: View {
 	@ViewBuilder
 	private func _button(_ title: String, action: @escaping () -> Void) -> some View {
 		Button(action: action) {
-			Text(title)
-				.lineLimit(0)
-				.font(.headline.bold())
-				.foregroundStyle(Color.accentColor)
-				.padding(.horizontal, 24)
-				.padding(.vertical, 6)
-				.background(Color(uiColor: .quaternarySystemFill))
-				.clipShape(Capsule())
+			ZStack {
+				// hidden labels make every button as wide as the longest one
+				ForEach([String.localized("Get"), .localized("Open"), .localized("Update")], id: \.self) {
+					Text($0).hidden()
+				}
+				Text(title)
+			}
+			.lineLimit(1)
+			.font(.subheadline.bold())
+			.foregroundStyle(Color.accentColor)
+			.padding(.horizontal, 12)
+			.frame(minWidth: 80)
+			.padding(.vertical, 7)
+			.background(Color(uiColor: .quaternarySystemFill))
+			.clipShape(Capsule())
 		}
 		.buttonStyle(.borderless)
 		.compatTransition()

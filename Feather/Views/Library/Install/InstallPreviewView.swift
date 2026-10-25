@@ -185,6 +185,17 @@ struct InstallPreviewView: View {
 
 	private func _install() {
 		let installsThroughServer = _installsThroughServer
+
+		if
+			!isSharing,
+			!installsThroughServer,
+			_installationMethod == 0,
+			installer.serverMethod == 0,
+			!LocalCertificateAuthority.isTrusted()
+		{
+			_showUntrustedCertificate()
+			return
+		}
 				
 		Task.detached {
 			let handler = await ArchiveHandler(app: app, viewModel: viewModel)
@@ -286,6 +297,22 @@ struct InstallPreviewView: View {
 		}
 	}
 	
+	private func _showUntrustedCertificate() {
+		UIAlertController.showAlert(
+			title: .localized("Local Certificate Not Trusted"),
+			message: .localized("Fully Local needs Feather's own certificate. Install the profile, then turn on full trust for \"Feather Local CA\" in Settings > General > About > Certificate Trust Settings, or switch to Semi Local in Installation settings."),
+			actions: [
+				UIAlertAction(title: .localized("Cancel"), style: .cancel) { _ in dismiss() },
+				UIAlertAction(title: .localized("Install Certificate Profile"), style: .default) { _ in
+					dismiss()
+					DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+						try? LocalCertificateAuthority.openProfile()
+					}
+				}
+			]
+		)
+	}
+
 	private func _showFailure(_ message: String) {
 		UIAlertController.showAlertWithOk(
 			title: .localized("Install"),

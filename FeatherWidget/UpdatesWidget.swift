@@ -7,6 +7,13 @@ import SwiftUI
 import WidgetKit
 
 @main
+struct FeatherWidgets: WidgetBundle {
+	var body: some Widget {
+		UpdatesWidget()
+		SettingsGuideLiveActivity()
+	}
+}
+
 struct UpdatesWidget: Widget {
 	var body: some WidgetConfiguration {
 		StaticConfiguration(kind: "Updates", provider: UpdatesProvider()) { entry in

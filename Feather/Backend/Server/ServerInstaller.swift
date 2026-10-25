@@ -18,10 +18,7 @@ import IDeviceSwift
 class ServerInstaller: Identifiable, ObservableObject {
 	let id = UUID()
 	let port = Int.random(in: 4000...8000)
-	let serverMethod: Int = {
-		let method = UserDefaults.standard.integer(forKey: "Feather.serverMethod")
-		return method == 0 && !LocalCertificateAuthority.isTrusted() ? 1 : method
-	}()
+	let serverMethod = UserDefaults.standard.integer(forKey: "Feather.serverMethod")
 	private var _needsShutdown = false
 	
 	var packageUrl: URL?

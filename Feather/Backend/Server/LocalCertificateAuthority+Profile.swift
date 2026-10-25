@@ -5,6 +5,7 @@
 //  Created by Jeongmin on 25.10.2026.
 //
 
+import SafariServices
 import UIKit
 import Vapor
 
@@ -31,16 +32,9 @@ extension LocalCertificateAuthority {
 		try app.server.start()
 		_profileServer = app
 
-		#if !targetEnvironment(macCatalyst)
-		BackgroundAudioManager.shared.start("localCertificateProfile")
-		#endif
-
-		// x-safari-http needs iOS 17
-		let path = "127.0.0.1:\(port)/FeatherLocalCA.mobileconfig"
-		UIApplication.shared.open(URL(string: "x-safari-http://\(path)")!) { opened in
-			guard !opened else { return }
-			UIApplication.shared.open(URL(string: "http://\(path)")!)
-		}
+		// other browsers only download the file, so keep it in Safari
+		let url = URL(string: "http://127.0.0.1:\(port)/FeatherLocalCA.mobileconfig")!
+		UIApplication.topViewController()?.present(SFSafariViewController(url: url), animated: true)
 
 		DispatchQueue.main.asyncAfter(deadline: .now() + 120) {
 			guard _profileServer === app else { return }
@@ -54,9 +48,5 @@ extension LocalCertificateAuthority {
 		_profileServer = nil
 		app.server.shutdown()
 		app.shutdown()
-
-		#if !targetEnvironment(macCatalyst)
-		BackgroundAudioManager.shared.stop("localCertificateProfile")
-		#endif
 	}
 }

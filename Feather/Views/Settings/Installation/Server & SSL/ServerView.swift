@@ -53,7 +53,7 @@ struct ServerView: View {
 						}
 					}
 				} footer: {
-					Text(.localized("Fully local installs need Feather's own certificate, which only works for this device's local server. Install the profile, then turn on full trust for \"Feather Local CA\" in Settings > General > About > Certificate Trust Settings. Until then, Feather installs with Semi Local."))
+					Text(.localized("Fully local installs need Feather's own certificate, which only works for this device's local server. Install the profile, then turn on full trust for \"Feather Local CA\" in Settings > General > About > Certificate Trust Settings. Until then, apps can't be installed with Fully Local."))
 				}
 			}
 		}

@@ -95,6 +95,18 @@ struct SettingsView: View {
 				}
 				
 				_database()
+
+				#if DEBUG
+				Section {
+					Button("Reset Onboarding", systemImage: "arrow.counterclockwise") {
+						LocalCertificateNoticeView.resetShown()
+					}
+				} header: {
+					Text(verbatim: "Debug")
+				} footer: {
+					Text(verbatim: "Shows the local certificate notice again on the next launch.")
+				}
+				#endif
 			}
 			.sheet(isPresented: $_isImportingDatabasePresenting) {
 				FileImporterRepresentableView(

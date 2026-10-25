@@ -73,6 +73,7 @@
 		F00D0000000000000000000F /* Exceptions for "FeatherWidget" folder in "Feather" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				SettingsGuideAttributes.swift,
 				UpdateWidgetSnapshot.swift,
 			);
 			target = 3379C1B82DA869A1004372DA /* Feather */;
@@ -598,7 +599,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = FeatherWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Feather;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -631,7 +632,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = FeatherWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Feather;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

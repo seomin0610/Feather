@@ -21,6 +21,7 @@ struct FeatherApp: App {
 	
 	@State private var _isFeatherPlusMigrationPresenting = Storage.hasFeatherPlusData
 		&& !UserDefaults.standard.bool(forKey: Storage.featherPlusMigrationDeclinedKey)
+	@State private var _isLocalCertificateNoticePresenting = LocalCertificateNoticeView.shouldPresent()
 	
 	var body: some Scene {
 		WindowGroup {
@@ -43,6 +44,9 @@ struct FeatherApp: App {
 				}
 			} message: {
 				Text(.localized("FeatherPlus data was found. Migrating replaces the current apps, certificates and sources with it and restarts the app."))
+			}
+			.fullScreenCover(isPresented: $_isLocalCertificateNoticePresenting) {
+				LocalCertificateNoticeView()
 			}
 			.onReceive(NotificationCenter.default.publisher(for: .heartbeatInvalidHost)) { _ in
 				DispatchQueue.main.async {

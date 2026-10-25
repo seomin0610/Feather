@@ -193,7 +193,8 @@ struct InstallPreviewView: View {
 			do {
 				try await handler.move()
 				
-				let packageUrl = try await handler.archive()
+				// the signer upload is limited by the network, so it's always worth compressing
+				let packageUrl = try await handler.archive(compression: installsThroughServer ? .DefaultCompression : nil)
 				
 				if await !isSharing {
 					if installsThroughServer {

@@ -26,7 +26,7 @@ struct ArchiveView: View {
 			Section {
 				Picker(.localized("Compression Level"), systemImage: "archivebox", selection: $_compressionLevel) {
 					ForEach(ZipCompression.allCases, id: \.rawValue) { level in
-						Text(level.label).tag(level)
+						Text(level.label).tag(level.rawValue)
 					}
 				}
 			}

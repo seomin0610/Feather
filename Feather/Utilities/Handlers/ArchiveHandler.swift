@@ -44,7 +44,8 @@ final class ArchiveHandler: NSObject {
 		_payloadUrl = payloadUrl
 	}
 	
-	func archive() async throws -> URL {
+	func archive(compression: ZipCompression? = nil) async throws -> URL {
+		let compression = compression ?? ArchiveHandler.compression
 		return try await Task.detached(priority: .background) { [self] in
 			guard let payloadUrl = await self._payloadUrl else {
 				throw SigningFileHandlerError.appNotFound
@@ -57,7 +58,7 @@ final class ArchiveHandler: NSObject {
 				paths: [payloadUrl],
 				zipFilePath: zipUrl,
 				password: nil,
-				compression: ZipCompression.allCases[ArchiveHandler.getCompressionLevel()],
+				compression: compression,
 				progress: { progress in
 					Task { @MainActor in
 						self.viewModel.packageProgress = progress
@@ -91,7 +92,8 @@ final class ArchiveHandler: NSObject {
 		try _fileManager.removeFileIfNeeded(at: _uniqueWorkDir)
 	}
 	
-	static func getCompressionLevel() -> Int {
-		UserDefaults.standard.integer(forKey: "Feather.compressionLevel")
+	static var compression: ZipCompression {
+		let level = UserDefaults.standard.object(forKey: "Feather.compressionLevel") as? Int
+		return level.flatMap(ZipCompression.init(rawValue:)) ?? .DefaultCompression
 	}
 }

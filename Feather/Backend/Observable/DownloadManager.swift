@@ -59,12 +59,10 @@ class DownloadManager: NSObject, ObservableObject {
 	
 	#if !targetEnvironment(macCatalyst)
 	private func _updateBackgroundAudioState() {
-		if #unavailable(iOS 26.0){
-			if !downloads.isEmpty {
-				BackgroundAudioManager.shared.start("download")
-			} else  {
-				BackgroundAudioManager.shared.stop("download")
-			}
+		if !downloads.isEmpty {
+			BackgroundAudioManager.shared.start("download")
+		} else  {
+			BackgroundAudioManager.shared.stop("download")
 		}
 	}
 	#endif
@@ -96,12 +94,15 @@ class DownloadManager: NSObject, ObservableObject {
 		
 		downloads.append(download)
 		
+		LiveTask.start(
+			id,
+			title: url.lastPathComponent,
+			subtitle: .localized("Downloading"),
+			goal: .localized("Download Complete"),
+			stages: [.localized("Downloading"), .localized("Extracting")]
+		)
 		#if !targetEnvironment(macCatalyst)
-		if #available(iOS 26.0, *) {
-			BackgroundTaskManager.shared.startTask(for: id, filename: url.lastPathComponent)
-		} else {
-			_updateBackgroundAudioState()
-		}
+		_updateBackgroundAudioState()
 		#endif
 		
 		return download
@@ -186,11 +187,8 @@ extension DownloadManager: URLSessionDownloadDelegate {
 				if let index = DownloadManager.shared.getDownloadIndex(by: dl.id) {
 					DownloadManager.shared.downloads.remove(at: index)
 					
+					LiveTask.update(dl.id, progress: 1.0)
 					#if !targetEnvironment(macCatalyst)
-					if #available(iOS 26.0, *) {
-						BackgroundTaskManager.shared.updateProgress(for: dl.id, progress: 1.0)
-					}
-					
 					self._updateBackgroundAudioState()
 					#endif
 				}
@@ -239,11 +237,7 @@ extension DownloadManager: URLSessionDownloadDelegate {
 			download.bytesDownloaded = totalBytesWritten
 			download.totalBytes = totalBytesExpectedToWrite
 			
-			#if !targetEnvironment(macCatalyst)
-			if #available(iOS 26.0, *) {
-				BackgroundTaskManager.shared.updateProgress(for: download.id, progress: download.overallProgress)
-			}
-			#endif
+			LiveTask.update(download.id, progress: download.progress, subtitle: .localized("Downloading"), stage: 0)
 		}
 	}
 	

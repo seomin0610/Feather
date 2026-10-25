@@ -59,11 +59,10 @@ struct InstallPreviewView: View {
 			SafariRepresentableView(url: installer.pageEndpoint).ignoresSafeArea()
 		}
 		.onChange(of: viewModel.packageProgress) { progress in
-			// packaging takes the first half of the bar, installing the second
-			LiveTask.update(_taskId, progress: progress * 0.5, subtitle: .localized("Packaging"))
+			LiveTask.update(_taskId, progress: progress, subtitle: .localized("Packaging"), stage: 0)
 		}
 		.onChange(of: viewModel.installProgress) { progress in
-			LiveTask.update(_taskId, progress: 0.5 + progress * 0.5, subtitle: _installsThroughServer ? .localized("Preparing Self-Update") : .localized("Installing"))
+			LiveTask.update(_taskId, progress: progress, subtitle: _installsThroughServer ? .localized("Preparing Self-Update") : .localized("Installing"), stage: 1)
 		}
 		.onReceive(viewModel.$status) { newStatus in
 			switch newStatus {
@@ -114,7 +113,13 @@ struct InstallPreviewView: View {
 			}
 		}
 		.onAppear {
-			LiveTask.start(_taskId, title: app.name ?? Bundle.main.name, subtitle: .localized("Packaging"))
+			LiveTask.start(
+				_taskId,
+				title: app.name ?? Bundle.main.name,
+				subtitle: .localized("Packaging"),
+				goal: .localized("Install Complete"),
+				stages: [.localized("Packaging"), .localized("Installing")]
+			)
 			_install()
 		}
 		

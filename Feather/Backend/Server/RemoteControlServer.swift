@@ -601,7 +601,13 @@ extension RemoteControlServer {
 			let download = Download(id: "FeatherManualDownload_Remote_\(UUID().uuidString)", url: file)
 			download.totalBytes = expected
 			DownloadManager.shared.downloads.append(download)
-			LiveTask.start(download.id, title: name, subtitle: .localized("Downloading"))
+			LiveTask.start(
+				download.id,
+				title: name,
+				subtitle: .localized("Downloading"),
+				goal: .localized("Download Complete"),
+				stages: [.localized("Downloading"), .localized("Extracting")]
+			)
 			return download
 		}
 
@@ -620,7 +626,7 @@ extension RemoteControlServer {
 					await MainActor.run {
 						download.bytesDownloaded = sent
 						download.progress = expected > 0 ? Double(sent) / Double(expected) : 0
-						LiveTask.update(download.id, progress: download.overallProgress)
+						LiveTask.update(download.id, progress: download.progress, subtitle: .localized("Downloading"), stage: 0)
 					}
 				}
 			}
@@ -651,7 +657,7 @@ extension RemoteControlServer {
 		}
 
 		await MainActor.run {
-			LiveTask.stop(download.id)
+			LiveTask.finish(download.id)
 			DownloadManager.shared.cancelDownload(download)
 		}
 

@@ -101,10 +101,38 @@ struct SettingsView: View {
 					Button("Reset Onboarding", systemImage: "arrow.counterclockwise") {
 						LocalCertificateNoticeView.resetShown()
 					}
+					Button("Preview Progress Activity", systemImage: "progress.indicator") {
+						Task {
+							let id = "FeatherDebugPreview"
+							LiveTask.start(id, title: "Feather", subtitle: .localized("Signing"), goal: .localized("Signing Complete"))
+							for percent in 1...100 {
+								try? await Task.sleep(nanoseconds: 100_000_000)
+								LiveTask.update(id, progress: Double(percent) / 100, subtitle: .localized("Signing"))
+							}
+						}
+					}
+					Button("Preview Download Activity", systemImage: "arrow.down.circle") {
+						Task {
+							let id = "FeatherDebugPreviewDownload"
+							LiveTask.start(
+								id,
+								title: "Feather.ipa",
+								subtitle: .localized("Downloading"),
+								goal: .localized("Download Complete"),
+								stages: [.localized("Downloading"), .localized("Extracting")]
+							)
+							for (stage, step) in [String.localized("Downloading"), .localized("Extracting")].enumerated() {
+								for percent in 1...100 {
+									try? await Task.sleep(nanoseconds: 60_000_000)
+									LiveTask.update(id, progress: Double(percent) / 100, subtitle: step, stage: stage)
+								}
+							}
+						}
+					}
 				} header: {
 					Text(verbatim: "Debug")
 				} footer: {
-					Text(verbatim: "Shows the local certificate notice again on the next launch.")
+					Text(verbatim: "Reset Onboarding shows the local certificate notice again on the next launch. The previews run a fake signing or download job for about 10 seconds, leave the app to see them.")
 				}
 				#endif
 			}

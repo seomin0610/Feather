@@ -70,12 +70,8 @@ final class AppFileHandler: NSObject, @unchecked Sendable {
 							if let download = download {
 								DispatchQueue.main.async {
 									download.unpackageProgress = progress
-									
-									#if !targetEnvironment(macCatalyst)
-									if #available(iOS 26.0, *) {
-										BackgroundTaskManager.shared.updateProgress(for: download.id, progress: download.overallProgress)
-									}
-									#endif
+									// importing still follows, the download finishes once the app is in the library
+									LiveTask.update(download.id, progress: min(progress, 0.99), subtitle: .localized("Extracting"), stage: 1)
 								}
 							}
 						}

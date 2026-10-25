@@ -11,6 +11,7 @@ struct FeatherWidgets: WidgetBundle {
 	var body: some Widget {
 		UpdatesWidget()
 		SettingsGuideLiveActivity()
+		TaskProgressLiveActivity()
 	}
 }
 

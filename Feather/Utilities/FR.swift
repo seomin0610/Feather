@@ -59,7 +59,7 @@ enum FR {
 			handler.appIcon = icon
 			
 			let task = "FeatherSigning_\(app.uuid ?? UUID().uuidString)"
-			LiveTask.start(task, title: app.name ?? Bundle.main.name, subtitle: .localized("Signing"))
+			LiveTask.start(task, title: app.name ?? Bundle.main.name, subtitle: .localized("Signing"), goal: .localized("Signing Complete"))
 			handler.onProgress = { progress in
 				LiveTask.update(task, progress: progress, subtitle: .localized("Signing"))
 				if let onProgress {
@@ -71,7 +71,7 @@ enum FR {
 				try await handler.copy()
 				try await handler.modify()
 				try? await handler.clean()
-				LiveTask.stop(task)
+				LiveTask.finish(task)
 				await MainActor.run {
 					completion(nil)
 				}

@@ -74,6 +74,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				SettingsGuideAttributes.swift,
+				TaskProgressAttributes.swift,
 				UpdateWidgetSnapshot.swift,
 			);
 			target = 3379C1B82DA869A1004372DA /* Feather */;

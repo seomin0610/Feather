@@ -2626,6 +2626,23 @@
         }
       }
     },
+    "Certificate Setup Guide" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Certificate Setup Guide"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "인증서 설정 가이드"
+          }
+        }
+      }
+    },
     "Certificates" : {
       "comment" : "Certificates tab",
       "extractionState" : "manual",

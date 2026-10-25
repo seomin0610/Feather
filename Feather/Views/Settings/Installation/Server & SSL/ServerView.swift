@@ -14,6 +14,7 @@ struct ServerView: View {
 	@AppStorage("Feather.ipFix") private var _ipFix: Bool = false
 	@AppStorage("Feather.serverMethod") private var _serverMethod: Int = 0
 	@State private var _isCertificateTrusted: Bool?
+	@State private var _isGuidePresenting = false
 	private let _serverMethods: [String] = [.localized("Fully Local"), .localized("Semi Local")]
 
 	// MARK: Body
@@ -51,6 +52,15 @@ struct ServerView: View {
 								message: error.localizedDescription
 							)
 						}
+					}
+
+					Button(.localized("Certificate Setup Guide"), systemImage: "questionmark.circle") {
+						_isGuidePresenting = true
+					}
+					.fullScreenCover(isPresented: $_isGuidePresenting, onDismiss: {
+						Task { await _checkTrust() }
+					}) {
+						LocalCertificateNoticeView()
 					}
 				} footer: {
 					Text(.localized("Fully local installs need Feather's own certificate, which only works for this device's local server. Install the profile, then turn on full trust for \"Feather Local CA\" in Settings > General > About > Certificate Trust Settings. Until then, apps can't be installed with Fully Local."))

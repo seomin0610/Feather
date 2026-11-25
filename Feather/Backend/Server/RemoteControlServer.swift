@@ -751,6 +751,8 @@ extension RemoteControlServer {
 		}
 
 		if request.install == true {
+			// the install sheet can't come up while that screen is still on its way out
+			try? await Task.sleep(nanoseconds: 600_000_000)
 			try await _install(uuid: signed.uuid)
 		}
 
@@ -761,8 +763,6 @@ extension RemoteControlServer {
 		await MainActor.run {
 			NotificationCenter.default.post(name: Notification.Name("Feather.remoteSigning"), object: nil)
 		}
-		// the install sheet can't come up while that screen is still on its way out
-		try? await Task.sleep(nanoseconds: 600_000_000)
 	}
 
 	/// Hands off to the librarys install sheet, which owns both the server and idevice paths.

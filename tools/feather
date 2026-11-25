@@ -425,6 +425,56 @@ def cmd_status(args):
         print("%-20s %s" % (key, value))
 
 
+def cmd_bench(args):
+    import http.client
+
+    host, token = config()
+    url = urllib.parse.urlparse(host)
+    size = os.path.getsize(args.ipa)
+    created = []
+
+    def report(step, seconds, note=""):
+        print("%-10s %6.2f s  %s" % (step, seconds, note), flush=True)
+
+    try:
+        connection = http.client.HTTPConnection(url.hostname, url.port, timeout=1800)
+        connection.putrequest("POST", "/v1/apps?" + urllib.parse.urlencode({"filename": os.path.basename(args.ipa)}))
+        connection.putheader("Authorization", "Bearer " + token)
+        connection.putheader("Content-Type", "application/octet-stream")
+        connection.putheader("Content-Length", str(size))
+        connection.endheaders()
+        start = time.time()
+        with open(args.ipa, "rb") as f:
+            while chunk := f.read(1 << 20):
+                connection.send(chunk)
+        uploaded = time.time()
+        response = connection.getresponse()
+        payload = response.read()
+        if response.status != 200:
+            sys.exit("import: %d %s" % (response.status, payload[:200]))
+        imported = json.loads(payload)["uuid"]
+        created.append(imported)
+        report("upload", uploaded - start, "%.0f MB/s" % (size / (uploaded - start) / 1e6))
+        report("import", time.time() - uploaded)
+
+        start = time.time()
+        signed = call("POST", "/v1/apps/%s/sign" % imported, body={})["uuid"]
+        created.append(signed)
+        report("sign", time.time() - start)
+
+        start = time.time()
+        response = call("GET", "/v1/apps/%s/ipa" % signed, raw=True)
+        packaged = time.time()
+        received = 0
+        while chunk := response.read(1 << 20):
+            received += len(chunk)
+        report("package", packaged - start)
+        report("download", time.time() - packaged, "%.0f MB" % (received / 1e6))
+    finally:
+        for uuid in reversed(created):
+            call("DELETE", "/v1/apps/%s" % uuid, timeout=60)
+
+
 def cmd_logs(args):
     sys.stdout.write(call("GET", "/v1/logs", timeout=60, raw=True).read().decode(errors="replace"))
 
@@ -781,6 +831,10 @@ def main():
     p = sub.add_parser("install", help="install an app on the device")
     p.add_argument("app")
     p.set_defaults(func=cmd_install)
+
+    p = sub.add_parser("bench", help="time import, sign and export of an ipa, then delete what it made")
+    p.add_argument("ipa")
+    p.set_defaults(func=cmd_bench)
 
     p = sub.add_parser("export", help="package an app and download it")
     p.add_argument("app")

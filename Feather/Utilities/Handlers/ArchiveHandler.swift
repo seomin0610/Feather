@@ -8,6 +8,7 @@
 import Foundation
 import UIKit.UIApplication
 import Zip
+import Zsign
 import SwiftUI
 import IDeviceSwift
 
@@ -16,7 +17,7 @@ final class ArchiveHandler: NSObject {
 	
 	private let _fileManager = FileManager.default
 	private let _uuid = UUID().uuidString
-	private var _payloadUrl: URL?
+	private var _appUrl: URL?
 	
 	private var _app: AppInfoPresentable
 	private let _uniqueWorkDir: URL
@@ -35,35 +36,47 @@ final class ArchiveHandler: NSObject {
 			throw SigningFileHandlerError.appNotFound
 		}
 		
-		let payloadUrl = _uniqueWorkDir.appendingPathComponent("Payload")
-		let movedAppURL = payloadUrl.appendingPathComponent(appUrl.lastPathComponent)
-
-		try _fileManager.createDirectoryIfNeeded(at: payloadUrl)
-		
-		try _fileManager.copyItem(at: appUrl, to: movedAppURL)
-		_payloadUrl = payloadUrl
+		try _fileManager.createDirectoryIfNeeded(at: _uniqueWorkDir)
+		_appUrl = appUrl
 	}
 	
 	func archive(compression: ZipCompression? = nil) async throws -> URL {
 		let compression = compression ?? ArchiveHandler.compression
-		return try await Task.detached(priority: .background) { [self] in
-			guard let payloadUrl = await self._payloadUrl else {
+		return try await Task.detached(priority: .userInitiated) { [self] in
+			guard let appUrl = await self._appUrl else {
 				throw SigningFileHandlerError.appNotFound
 			}
 			
 			let zipUrl = self._uniqueWorkDir.appendingPathComponent("Archive.zip")
 			let ipaUrl = self._uniqueWorkDir.appendingPathComponent("Archive.ipa")
+			let progress: (Double) -> Void = { progress in
+				Task { @MainActor in
+					self.viewModel.packageProgress = progress
+				}
+			}
 			
-			try await Zip.zipFiles(
-				paths: [payloadUrl],
-				zipFilePath: zipUrl,
-				password: nil,
-				compression: compression,
-				progress: { progress in
-					Task { @MainActor in
-						self.viewModel.packageProgress = progress
-					}
-				})
+			if compression == .NoCompression {
+				guard Zsign.archive(
+					folder: appUrl.path,
+					to: zipUrl.path,
+					prefix: "Payload/\(appUrl.lastPathComponent)/",
+					progress: progress
+				) else {
+					throw ZipError.zipFail
+				}
+			} else {
+				let payloadUrl = self._uniqueWorkDir.appendingPathComponent("Payload")
+				try FileManager.default.createDirectoryIfNeeded(at: payloadUrl)
+				try FileManager.default.copyItem(at: appUrl, to: payloadUrl.appendingPathComponent(appUrl.lastPathComponent))
+				
+				try await Zip.zipFiles(
+					paths: [payloadUrl],
+					zipFilePath: zipUrl,
+					password: nil,
+					compression: compression,
+					progress: progress
+				)
+			}
 			
 			try FileManager.default.moveItem(at: zipUrl, to: ipaUrl)
 			return ipaUrl
@@ -94,6 +107,6 @@ final class ArchiveHandler: NSObject {
 	
 	static var compression: ZipCompression {
 		let level = UserDefaults.standard.object(forKey: "Feather.compressionLevel") as? Int
-		return level.flatMap(ZipCompression.init(rawValue:)) ?? .DefaultCompression
+		return level.flatMap(ZipCompression.init(rawValue:)) ?? .NoCompression
 	}
 }

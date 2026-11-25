@@ -8,6 +8,7 @@
 import Foundation
 import CryptoKit
 import Zip
+import Zsign
 import SwiftUI
 
 final class AppFileHandler: NSObject, @unchecked Sendable {
@@ -57,25 +58,33 @@ final class AppFileHandler: NSObject, @unchecked Sendable {
 		}
 		
 		let download = self._download
+		let progress: (Double) -> Void = { progress in
+			if let download = download {
+				DispatchQueue.main.async {
+					download.unpackageProgress = progress
+					// importing still follows, the download finishes once the app is in the library
+					LiveTask.update(download.id, progress: min(progress, 0.99), subtitle: .localized("Extracting"), stage: 1)
+				}
+			}
+		}
 		
 		try await withCheckedThrowingContinuation { continuation in
-			DispatchQueue.global(qos: .utility).async {
+			DispatchQueue.global(qos: .userInitiated).async {
 				do {
-					try Zip.unzipFile(
-						self._ipa,
-						destination: self._uniqueWorkDir,
-						overwrite: true,
-						password: nil,
-						progress: { progress in
-							if let download = download {
-								DispatchQueue.main.async {
-									download.unpackageProgress = progress
-									// importing still follows, the download finishes once the app is in the library
-									LiveTask.update(download.id, progress: min(progress, 0.99), subtitle: .localized("Extracting"), stage: 1)
-								}
-							}
-						}
-					)
+					switch Zsign.extract(zipPath: self._ipa.path, to: self._uniqueWorkDir.path, progress: progress) {
+					case 0:
+						break
+					case 1:
+						try Zip.unzipFile(
+							self._ipa,
+							destination: self._uniqueWorkDir,
+							overwrite: true,
+							password: nil,
+							progress: progress
+						)
+					default:
+						throw ZipError.unzipFail
+					}
 					
 					self.uniqueWorkDirPayload = self._uniqueWorkDir.appendingPathComponent("Payload")
 					continuation.resume()

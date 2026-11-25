@@ -65,6 +65,8 @@ struct InstallPreviewView: View {
 			LiveTask.update(_taskId, progress: progress, subtitle: _installsThroughServer ? .localized("Preparing Self-Update") : .localized("Installing"), stage: 1)
 		}
 		.onReceive(viewModel.$status) { newStatus in
+			Logger.install.notice("Status: \(String(describing: newStatus), privacy: .public)")
+
 			switch newStatus {
 			case .completed: LiveTask.update(_taskId, progress: 1.0, subtitle: .localized("Installing"))
 			case .broken: LiveTask.stop(_taskId)
@@ -201,7 +203,9 @@ struct InstallPreviewView: View {
 			_showUntrustedCertificate()
 			return
 		}
-				
+
+		_logInstallContext()
+
 		Task.detached {
 			let handler = await ArchiveHandler(app: app, viewModel: viewModel)
 			let servesPackage = await MainActor.run { !isSharing && !installsThroughServer && _installationMethod == 0 }
@@ -256,6 +260,7 @@ struct InstallPreviewView: View {
 					try? await handler.clean()
 				}
 			} catch {
+				Logger.install.error("Install failed: \(String(describing: error), privacy: .public)")
 				try? await handler.clean()
 				await progressTask?.cancel()
 				
@@ -360,9 +365,11 @@ struct InstallPreviewView: View {
 
 		Task.detached(priority: .background) {
 			var hasStarted = false
+			var lastLogged: String?
 
 			while !Task.isCancelled {
-				let rawProgress = await UIApplication.installProgress(for: bundleID) ?? 0.0
+				let progressObject = await UIApplication.installProgress(for: bundleID)
+				let rawProgress = progressObject ?? 0.0
 
 				if rawProgress > 0 {
 					hasStarted = true
@@ -372,7 +379,11 @@ struct InstallPreviewView: View {
 					? _normalizeInstallProgress(rawProgress)
 					: 0.0
 
-				Logger.misc.info("Install progress for \(bundleID): \(progress)")
+				let logged = progressObject.map { String(format: "%.2f", $0) } ?? "none"
+				if logged != lastLogged {
+					Logger.install.notice("Install progress: \(logged, privacy: .public)")
+					lastLogged = logged
+				}
 
 				await MainActor.run {
 					viewModel.installProgress = progress
@@ -393,5 +404,34 @@ struct InstallPreviewView: View {
 
 	private func _normalizeInstallProgress(_ rawProgress: Double) -> Double {
 		min(1.0, max(0.0, (rawProgress - 0.6) / 0.3))
+	}
+
+	private func _logInstallContext() {
+		let identifier = app.identifier ?? "-"
+		let signingTeam = (app as? Signed)?.certificate
+			.flatMap { Storage.shared.getProvisionFileDecoded(for: $0)?.TeamIdentifier.first } ?? "-"
+		let ipFix = UserDefaults.standard.bool(forKey: "Feather.ipFix")
+
+		Logger.install.notice("Install \(identifier, privacy: .public) \(app.version ?? "-", privacy: .public) team=\(signingTeam, privacy: .public) method=\(_installationMethod) server=\(installer.serverMethod) ipFix=\(ipFix) compression=\(ArchiveHandler.compression.rawValue)")
+		Logger.install.notice("On device: \(Self._installedAppInfo(identifier), privacy: .public)")
+	}
+
+	private static func _installedAppInfo(_ bundleID: String) -> String {
+		let selector = NSSelectorFromString("applicationProxyForIdentifier:")
+
+		guard
+			let proxyClass = NSClassFromString("LSApplicationProxy") as? NSObject.Type,
+			proxyClass.responds(to: selector),
+			let proxy = proxyClass.perform(selector, with: bundleID)?.takeUnretainedValue() as? NSObject
+		else {
+			return "unavailable"
+		}
+
+		return ["isInstalled", "teamID", "signerIdentity", "shortVersionString", "bundleVersion"]
+			.map { key in
+				let value = proxy.responds(to: NSSelectorFromString(key)) ? proxy.value(forKey: key).map { "\($0)" } : nil
+				return "\(key)=\(value ?? "-")"
+			}
+			.joined(separator: " ")
 	}
 }

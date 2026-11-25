@@ -6289,6 +6289,23 @@
         }
       }
     },
+    "Export Logs" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export Logs"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "로그 내보내기"
+          }
+        }
+      }
+    },
     "Extracting" : {
       "extractionState" : "manual",
       "localizations" : {

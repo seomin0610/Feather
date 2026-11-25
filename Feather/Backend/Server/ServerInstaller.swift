@@ -13,6 +13,7 @@ import NIOSSL
 import NIOTLS
 import SwiftUI
 import IDeviceSwift
+import OSLog
 
 // MARK: - Class
 class ServerInstaller: Identifiable, ObservableObject {
@@ -53,6 +54,7 @@ class ServerInstaller: Identifiable, ObservableObject {
 	private func _configureRoutes() throws {
 		_server?.get("*") { [weak self] req in
 			guard let self else { return Response(status: .badGateway) }
+			Logger.install.notice("GET \(req.url.path, privacy: .public) range=\(req.headers.first(name: .range) ?? "-", privacy: .public) ua=\(req.headers.first(name: .userAgent) ?? "-", privacy: .public)")
 			switch req.url.path {
 			case plistEndpoint.path:
 				self._updateStatus(.sendingManifest)
@@ -79,8 +81,10 @@ class ServerInstaller: Identifiable, ObservableObject {
 				) { result in
 					switch result {
 					case .success:
+						Logger.install.notice("Payload sent")
 						self._updateStatus(.installing)
 					case .failure(let error):
+						Logger.install.error("Payload failed: \(String(describing: error), privacy: .public)")
 						self._updateStatus(.broken(error))
 					}
 

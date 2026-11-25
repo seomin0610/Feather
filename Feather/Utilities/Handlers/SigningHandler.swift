@@ -56,7 +56,7 @@ final class SigningHandler: NSObject {
 		}
 		_movedAppPath = movedAppURL
 		Logger.misc.info("[\(self._uuid)] Moved Payload to: \(movedAppURL.path)")
-		_logStep(cloned ? "clone" : "copy")
+		_finishStep(cloned ? "clone" : "copy", progress: 0.05)
 	}
 	
 	func modify() async throws {
@@ -95,7 +95,7 @@ final class SigningHandler: NSObject {
 		
 		try await _removePresetFiles(for: movedAppPath)
 		try await _removeWatchIfNeeded(for: movedAppPath)
-		_logStep("prepare")
+		_finishStep("prepare", progress: 0.1)
 		
 		if _options.experiment_supportLiquidGlass {
 			try await _locateMachosAndChangeToSDK26(for: movedAppPath)
@@ -108,11 +108,11 @@ final class SigningHandler: NSObject {
 				try await _inject(for: movedAppPath, with: _options)
 			}
 		}
-		_logStep("inject")
+		_finishStep("inject")
 		
 		// iOS "26" (19) needs special treatment
 		try await _locateMachosAndFixupArm64eSlice(for: movedAppPath)
-		_logStep("arm64e fixup")
+		_finishStep("arm64e fixup", progress: 0.12)
 		
 		if _options.mergeEntitlements && _options.appEntitlementsFile == nil {
 			try await _mergeEntitlements(for: movedAppPath, with: _options)
@@ -121,7 +121,7 @@ final class SigningHandler: NSObject {
 		if _options.appEntitlementsFile == nil {
 			try _fixProfileEntitlements()
 		}
-		_logStep("entitlements")
+		_finishStep("entitlements", progress: 0.15)
 		
 		let handler = ZsignHandler(appUrl: movedAppPath, options: _options, cert: appCertificate)
 		try await handler.disinject()
@@ -130,7 +130,8 @@ final class SigningHandler: NSObject {
 			_options.signingOption == .default,
 			appCertificate != nil
 		{
-			try await handler.sign(progress: onProgress)
+			let onProgress = onProgress
+			try await handler.sign(progress: { onProgress?(0.15 + $0 * 0.85) })
 //		} else if _options.signingOption == .adhoc {
 //			try await handler.adhocSign()
 		} else if _options.signingOption == .onlyModify {
@@ -138,12 +139,12 @@ final class SigningHandler: NSObject {
 		} else {
 			throw SigningFileHandlerError.missingCertifcate
 		}
-		_logStep("zsign")
+		_finishStep("zsign")
 		
 		try await self.move()
-		_logStep("move")
+		_finishStep("move")
 		try await self.addToDatabase()
-		_logStep("database")
+		_finishStep("database")
 	}
 	
 	func move() async throws {
@@ -215,10 +216,14 @@ final class SigningHandler: NSObject {
 		try _fileManager.removeFileIfNeeded(at: _uniqueWorkDir)
 	}
 	
-	private func _logStep(_ step: String) {
+	private func _finishStep(_ step: String, progress: Double? = nil) {
 		let now = Date()
 		Logger.signing.notice("[\(self._uuid, privacy: .public)] \(step, privacy: .public) \(now.timeIntervalSince(self._lap), format: .fixed(precision: 3))s")
 		_lap = now
+		
+		if let progress {
+			onProgress?(progress)
+		}
 	}
 }
 

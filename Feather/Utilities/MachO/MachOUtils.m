@@ -16,6 +16,11 @@ NSString *LCPatchMachOFixupARM64eSlice(const char *path) {
 	if(fd < 0) {
 		return [NSString stringWithFormat:@"Failed to open %s: %s", path, strerror(errno)];
 	}
+	uint32_t fileMagic = 0;
+	if(pread(fd, &fileMagic, sizeof(fileMagic), 0) != sizeof(fileMagic) || fileMagic != FAT_CIGAM) {
+		close(fd);
+		return nil;
+	}
 	struct stat s = {0};
 	fstat(fd, &s);
 	void *map = mmap(NULL, s.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);

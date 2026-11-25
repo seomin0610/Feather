@@ -316,6 +316,10 @@ extension RemoteControlServer {
 			try await Self._apps()
 		}
 
+		app.get("v1", "logs") { _ async throws -> String in
+			try Logger.collectLogs()
+		}
+
 		app.on(.POST, "v1", "apps", body: .stream) { req async throws -> AppModel in
 			try await Self._import(req)
 		}

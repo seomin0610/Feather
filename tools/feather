@@ -425,6 +425,10 @@ def cmd_status(args):
         print("%-20s %s" % (key, value))
 
 
+def cmd_logs(args):
+    sys.stdout.write(call("GET", "/v1/logs", timeout=60, raw=True).read().decode(errors="replace"))
+
+
 def cmd_apps(args):
     for app in call("GET", "/v1/apps", timeout=30)["apps"]:
         show_app(app)
@@ -752,6 +756,7 @@ def main():
 
     sub.add_parser("status", help="device and app info").set_defaults(func=cmd_status)
     sub.add_parser("apps", help="list apps").set_defaults(func=cmd_apps)
+    sub.add_parser("logs", help="print Feather's logs since it was opened").set_defaults(func=cmd_logs)
 
     def signing_flags(parser):
         parser.add_argument("--cert", type=int, help="certificate index, see `feather certs`")

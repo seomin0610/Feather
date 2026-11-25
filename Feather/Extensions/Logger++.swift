@@ -14,9 +14,9 @@ extension Logger {
 	static let misc = Logger(subsystem: subsystem, category: "Misc")
 	static let install = Logger(subsystem: subsystem, category: "Install")
 
-	static func exportLogs() throws -> URL {
+	static func collectLogs() throws -> String {
 		let store = try OSLogStore(scope: .currentProcessIdentifier)
-		let entries = try store.getEntries(matching: NSPredicate(format: "subsystem == %@", subsystem))
+		let entries = try store.getEntries(matching: NSPredicate(format: "subsystem IN %@", [subsystem, "zsign"]))
 		let formatter = ISO8601DateFormatter()
 		formatter.formatOptions.insert(.withFractionalSeconds)
 
@@ -24,7 +24,11 @@ extension Logger {
 		for case let entry as OSLogEntryLog in entries {
 			text += "\(formatter.string(from: entry.date)) [\(entry.category)] \(entry.composedMessage)\n"
 		}
+		return text
+	}
 
+	static func exportLogs() throws -> URL {
+		let text = try collectLogs()
 		let url = FileManager.default.temporaryDirectory.appendingPathComponent("Feather-\(Int(Date().timeIntervalSince1970)).log")
 		try text.write(to: url, atomically: true, encoding: .utf8)
 		return url
